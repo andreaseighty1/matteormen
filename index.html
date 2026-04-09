@@ -1,0 +1,2236 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#060c08">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<title>Matteormen 🐍</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Exo+2:wght@400;600;800&family=Nunito:wght@700;900&display=swap');
+:root{
+  --bg:#060c08;--panel:rgba(255,255,255,.05);--line:rgba(0,255,100,.15);
+  --text:#d8fde8;--muted:#5a8c6a;--accent:#00ff88;--gold:#ffd700;
+  --ov-card-bg:rgba(6,12,8,.96);--toast-bg:rgba(10,30,15,.96);
+}
+
+/* ── UI-TEMAN ── */
+[data-theme="skog"]{
+  --panel:rgba(0,80,30,.08);--line:rgba(0,140,50,.25);
+  --text:#1a3320;--muted:#4d8060;--accent:#008844;--gold:#b07000;
+  --ov-card-bg:rgba(240,252,244,.97);--toast-bg:rgba(224,248,232,.97);
+}
+[data-theme="hav"]{
+  --panel:rgba(0,60,160,.07);--line:rgba(0,100,200,.25);
+  --text:#162840;--muted:#456080;--accent:#0066bb;--gold:#b07000;
+  --ov-card-bg:rgba(235,245,255,.97);--toast-bg:rgba(220,238,255,.97);
+}
+[data-theme="solnedgang"]{
+  --panel:rgba(255,255,255,.05);--line:rgba(255,120,30,.2);
+  --text:#ffe0c8;--muted:#8a6050;--accent:#ff8844;--gold:#ffcc00;
+  --ov-card-bg:rgba(18,8,4,.96);--toast-bg:rgba(25,10,5,.96);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{height:100%}body{height:100dvh;min-height:100%;background:var(--bg);color:var(--text);font-family:'Exo 2',sans-serif;overflow:hidden}
+body{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(0,255,100,.06),transparent 60%),
+             linear-gradient(180deg,#060c08,#03080a);}
+.screen{display:none;flex-direction:column;align-items:center;justify-content:center;
+        width:100%;height:100%;padding:8px;overflow-y:auto}
+.screen.active{display:flex}
+
+/* ── MENY ── */
+.player-bar{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:16px;font-weight:700;color:var(--accent)}
+.player-bar button{background:none;border:1px solid var(--line);border-radius:8px;color:var(--muted);
+  font-size:13px;font-family:'Exo 2',sans-serif;font-weight:800;
+  padding:0 12px;height:38px;white-space:nowrap;cursor:pointer;transition:.12s;
+  display:flex;align-items:center;gap:5px;}
+.player-bar button:hover{border-color:var(--accent);color:var(--accent)}
+.lang-row{display:flex;gap:6px;justify-content:center;margin-bottom:10px;}
+.lang-btn{padding:4px 12px;border:1px solid var(--line);border-radius:8px;
+  background:transparent;color:var(--muted);font-family:'Exo 2',sans-serif;
+  font-size:12px;font-weight:800;cursor:pointer;transition:.12s;}
+.lang-btn:hover{border-color:var(--accent);color:var(--text)}
+.lang-btn.sel{border-color:var(--accent);background:rgba(0,255,136,.1);color:var(--accent)}
+.menu-sub{font-size:11px;color:var(--muted);margin-bottom:10px;letter-spacing:.1em;text-transform:uppercase}
+.menu-cols{display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;
+           justify-content:center;margin-bottom:10px;width:100%;max-width:940px}
+.menu-panel{border:1px solid var(--line);border-radius:13px;background:var(--panel);
+            padding:11px 13px;flex:1;min-width:155px;max-width:295px}
+.panel-title{font-size:10px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;
+             margin-bottom:7px;font-weight:700}
+.panel-desc{font-size:10px;color:var(--muted);margin-bottom:6px;line-height:1.5}
+.grade-row{display:flex;flex-wrap:wrap;gap:5px}
+.preset-btn{padding:4px 10px;border:1px solid var(--line);border-radius:8px;
+  background:transparent;color:var(--muted);font-family:'Exo 2',sans-serif;
+  font-size:12px;font-weight:800;cursor:pointer;transition:.12s;}
+.preset-btn:hover{border-color:var(--accent);color:var(--text)}
+.preset-btn.sel{border-color:var(--accent);background:rgba(0,255,136,.1);color:var(--accent)}
+.op-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.op-btn{padding:12px 6px;border:2px solid var(--line);border-radius:10px;
+  background:transparent;color:var(--muted);font-family:'Orbitron',monospace;
+  font-size:17px;font-weight:900;cursor:pointer;transition:.12s;text-align:center;}
+.op-btn:hover{border-color:var(--accent);color:var(--accent)}
+.op-btn.sel{border-color:var(--accent);background:rgba(0,255,136,.12);
+            color:var(--accent);box-shadow:0 0 10px rgba(0,255,136,.15)}
+.range-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:5px}
+.range-btn{padding:5px 10px;border:1px solid var(--line);border-radius:8px;
+  background:transparent;color:var(--muted);font-family:'Orbitron',monospace;
+  font-size:11px;font-weight:700;cursor:pointer;transition:.12s;white-space:nowrap;}
+.range-btn:hover{border-color:var(--accent);color:var(--text)}
+.range-btn.sel{border-color:var(--accent);background:rgba(0,255,136,.1);color:var(--accent)}
+.range-hint{font-size:10px;color:var(--muted);margin-top:3px;line-height:1.5}
+.table-quick{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px}
+.tq-btn{padding:3px 8px;border:1px solid var(--line);border-radius:6px;
+  background:transparent;color:var(--muted);font-family:'Exo 2',sans-serif;
+  font-size:11px;font-weight:800;cursor:pointer;transition:.12s;white-space:nowrap;}
+.tq-btn:hover{border-color:var(--accent);color:var(--text)}
+.tq-btn.sel{border-color:var(--accent);background:rgba(0,255,136,.1);color:var(--accent)}
+.table-grid{display:flex;gap:4px;flex-wrap:wrap}
+.tb-btn{padding:4px 6px;border:1px solid var(--line);border-radius:6px;
+  background:transparent;color:var(--muted);font-family:'Orbitron',monospace;
+  font-size:11px;font-weight:700;cursor:pointer;transition:.12s;min-width:34px;text-align:center;}
+.tb-btn:hover{border-color:var(--accent);color:var(--text)}
+.tb-btn.sel{border-color:var(--accent);background:rgba(0,255,136,.1);color:var(--accent)}
+.speed-row{display:flex;flex-direction:column;gap:5px;margin-bottom:6px}
+.speed-btn{padding:6px 10px;border:1px solid var(--line);border-radius:8px;
+  background:transparent;color:var(--muted);font-family:'Exo 2',sans-serif;
+  font-size:11px;font-weight:700;cursor:pointer;transition:.12s;text-align:left;}
+.speed-btn:hover{border-color:var(--accent);color:var(--text)}
+.speed-btn.sel{border-color:var(--accent);background:rgba(0,255,136,.1);color:var(--accent)}
+/* Toggle-rad (väggar + svårighets-combo) */
+.toggle-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.toggle-btn{padding:5px 10px;border:1px solid var(--line);border-radius:8px;
+  background:transparent;color:var(--muted);font-family:'Exo 2',sans-serif;
+  font-size:11px;font-weight:700;cursor:pointer;transition:.12s;flex:1;text-align:center;}
+.toggle-btn:hover{border-color:var(--accent);color:var(--text)}
+.toggle-btn.sel{border-color:var(--accent);background:rgba(0,255,136,.1);color:var(--accent)}
+
+.play-btn{padding:12px 44px;border:2px solid var(--accent);border-radius:13px;
+  background:rgba(0,255,136,.12);color:var(--accent);font-family:'Orbitron',monospace;
+  font-size:16px;font-weight:700;cursor:pointer;transition:.15s;letter-spacing:.06em;
+  box-shadow:0 0 20px rgba(0,255,136,.2);margin-bottom:8px;}
+.play-btn:hover{background:rgba(0,255,136,.22);box-shadow:0 0 32px rgba(0,255,136,.35);transform:translateY(-1px)}
+
+/* ── MENY BOTTEN ── */
+.menu-bottom{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap;
+             justify-content:center;width:100%;max-width:560px;margin-bottom:6px;}
+.hs-panel{border:1px solid var(--line);border-radius:13px;background:var(--panel);
+          padding:11px 15px;flex:2;min-width:260px;}
+.medals-nav-btn{border:1px solid var(--line);border-radius:13px;background:var(--panel);
+  padding:11px 18px;flex:1;min-width:140px;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;cursor:pointer;transition:.15s;gap:4px;}
+.medals-nav-btn:hover{border-color:var(--accent);background:rgba(0,255,136,.07);}
+.medals-nav-btn .mn-emoji{font-size:28px}
+.medals-nav-btn .mn-label{font-family:'Orbitron',monospace;font-size:10px;color:var(--accent);letter-spacing:.1em;}
+.medals-nav-btn .mn-count{font-size:11px;color:var(--muted);}
+.hs-title{font-family:'Orbitron',monospace;font-size:11px;color:var(--accent);letter-spacing:.1em;margin-bottom:8px;text-align:center}
+.hs-row{display:flex;justify-content:space-between;gap:8px;padding:4px 0;
+        border-bottom:1px solid rgba(0,255,100,.06);font-size:11px;align-items:center}
+.hs-row:last-child{border-bottom:none}
+.hs-rank{color:var(--muted);font-weight:800;width:20px;flex-shrink:0}
+.hs-name{flex:1;color:var(--text)}
+.hs-meta{font-size:10px;color:var(--muted)}
+.hs-score{color:var(--gold);font-weight:800;font-family:'Orbitron',monospace;font-size:11px}
+.hs-empty{color:var(--muted);font-size:12px;text-align:center;padding:6px 0}
+.export-row{display:flex;gap:8px;justify-content:center;margin-bottom:4px;flex-wrap:wrap}
+.export-btn{padding:7px 16px;border:1px solid var(--line);border-radius:10px;
+  background:var(--panel);color:var(--muted);font-family:'Exo 2',sans-serif;
+  font-size:12px;font-weight:800;cursor:pointer;transition:.12s;}
+.export-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ── SPELSKÄRM ── */
+.game-wrap{display:flex;flex-direction:column;align-items:center;width:100%;max-width:400px}
+.game-top{display:flex;justify-content:space-between;align-items:center;width:100%;padding:4px 2px}
+.g-stat{font-family:'Orbitron',monospace;font-size:10px;color:var(--muted)}
+.g-stat span{color:var(--accent);font-size:16px;display:block;line-height:1.1}
+.g-lives{display:flex;gap:4px;justify-content:center}
+.life{font-size:17px;transition:.2s} .life.lost{opacity:.18;filter:grayscale(1)}
+.combo{font-family:'Orbitron',monospace;font-size:11px;color:var(--gold);min-height:16px;text-align:center;margin-top:2px}
+.eq-bar{width:100%;display:flex;align-items:center;justify-content:center;
+  padding:10px 14px;margin:5px 0;border:1px solid var(--line);border-radius:12px;background:rgba(0,255,100,.04);}
+.eq-text{font-family:'Nunito','Exo 2',sans-serif;font-size:clamp(24px,4vw,46px);font-weight:900;
+  color:var(--text);letter-spacing:.01em;text-shadow:0 0 16px var(--accent);}
+canvas{border:1px solid var(--line);border-radius:12px;touch-action:none;
+       box-shadow:0 0 36px rgba(0,255,100,.07),inset 0 0 50px rgba(0,0,0,.5);display:block}
+.hint-row{display:flex;gap:10px;margin-top:5px;font-size:10px;color:var(--muted);flex-wrap:wrap;justify-content:center}
+.hk{background:rgba(255,255,255,.07);border:1px solid var(--line);border-radius:4px;
+    padding:1px 5px;font-family:monospace;font-size:10px;color:var(--text)}
+
+/* ── TOUCH D-PAD ── */
+#touchControls{
+  display:none;flex-direction:column;align-items:center;gap:3px;
+  width:100%;max-width:340px;padding:4px 0 2px;
+}
+#touchControls.show{display:flex}
+.dpad-row{display:flex;gap:4px;}
+.dpad-btn{
+  width:50px;height:50px;border:2px solid rgba(0,255,136,.35);border-radius:12px;
+  background:rgba(0,255,136,.1);color:var(--accent);font-size:18px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  user-select:none;-webkit-user-select:none;touch-action:manipulation;
+  transition:background .08s;backdrop-filter:blur(4px);
+}
+.dpad-btn:active,.dpad-btn.pressed{background:rgba(0,255,136,.32);border-color:var(--accent);}
+.dpad-center{width:50px;height:50px;}/* spacer */
+
+/* ── MEDALJER-SIDA ── */
+.medals-page{width:100%;max-width:640px;padding:8px 0 40px;}
+#medalsScreen,#hsScreen,#skinsScreen{justify-content:flex-start;padding-top:12px;}
+
+/* ── ORMSKINN-SIDA ── */
+.skins-grid{display:flex;flex-wrap:wrap;gap:10px;width:100%;max-width:640px;padding-bottom:24px;}
+.skin-card{display:flex;align-items:center;gap:10px;padding:10px 12px;
+  border:2px solid var(--line);border-radius:12px;background:var(--panel);
+  cursor:pointer;transition:.15s;flex:1;min-width:195px;max-width:310px;position:relative;}
+.skin-card:hover:not(.locked){border-color:var(--accent);}
+.skin-card.active{border-color:var(--accent);background:rgba(0,255,136,.1);box-shadow:0 0 12px rgba(0,255,136,.2);}
+.skin-card.locked{opacity:.45;cursor:default;}
+.skin-preview{width:64px;height:22px;border-radius:6px;flex-shrink:0;border:1px solid rgba(255,255,255,.15);}
+.skin-info{flex:1;min-width:0;}
+.skin-name{font-size:12px;font-weight:800;color:var(--text);}
+.skin-unlock{font-size:9px;color:var(--muted);margin-top:2px;line-height:1.4;}
+.skin-badge{position:absolute;right:10px;top:50%;transform:translateY(-50%);
+  font-size:9px;font-weight:800;color:var(--accent);letter-spacing:.06em;}
+.skin-lock-badge{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:15px;}
+.medals-page-top{display:flex;align-items:center;gap:12px;margin-bottom:16px;width:100%;}
+.back-btn{padding:7px 14px;border:1px solid var(--line);border-radius:10px;
+  background:var(--panel);color:var(--muted);font-family:'Exo 2',sans-serif;
+  font-size:13px;font-weight:800;cursor:pointer;transition:.12s;flex-shrink:0;}
+.back-btn:hover{border-color:var(--accent);color:var(--accent)}
+.mp-title{font-family:'Orbitron',monospace;font-size:16px;color:var(--accent);letter-spacing:.08em;text-shadow:0 0 16px rgba(0,255,136,.4);}
+.mp-count{font-size:12px;color:var(--muted);margin-left:auto;}
+.medals-cat{margin-bottom:18px;width:100%;}
+.medals-cat-title{font-size:10px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;
+                  margin-bottom:8px;font-weight:700;border-bottom:1px solid var(--line);padding-bottom:4px;}
+.medals-grid{display:flex;flex-wrap:wrap;gap:7px;}
+.medal-badge{display:flex;align-items:flex-start;gap:6px;padding:7px 11px;border-radius:9px;
+             border:1px solid;font-weight:700;transition:.15s;cursor:default;min-width:160px;}
+.medal-badge.unlocked{border-color:rgba(0,255,136,.45);background:rgba(0,255,136,.09);color:var(--text);}
+.medal-badge.locked{border-color:rgba(255,255,255,.07);background:rgba(0,0,0,.25);
+  color:rgba(255,255,255,.22);filter:grayscale(1);}
+.medal-badge .m-emoji{font-size:18px;line-height:1.3;flex-shrink:0;}
+.medal-badge .m-info{display:flex;flex-direction:column;flex:1;min-width:0;}
+.medal-badge .m-name{font-size:11px;font-weight:800;}
+.medal-badge .m-desc{font-size:9px;color:var(--muted);font-weight:400;}
+.medal-badge.unlocked .m-desc{color:rgba(0,255,136,.6);}
+/* Progress bar under locked medal */
+.medal-prog{height:4px;background:rgba(255,255,255,.1);border-radius:2px;margin-top:4px;overflow:hidden;}
+.medal-prog-bar{height:100%;background:var(--accent);border-radius:2px;opacity:.65;transition:width .3s;}
+.medal-prog-text{font-size:8px;color:rgba(255,255,255,.3);margin-top:2px;display:block;}
+
+/* ── OVERLAYS ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.83);backdrop-filter:blur(8px);
+         display:none;flex-direction:column;align-items:center;justify-content:center;z-index:100;gap:12px}
+.overlay.show{display:flex}
+.ov-title{font-family:'Orbitron',monospace;font-size:clamp(22px,4vw,44px);font-weight:900;
+          color:var(--accent);text-shadow:0 0 26px rgba(0,255,136,.4);letter-spacing:.06em}
+.ov-title.bad{color:#ff3355;text-shadow:0 0 26px rgba(255,51,85,.5)}
+.ov-card{border:1px solid var(--line);border-radius:18px;background:var(--ov-card-bg);
+         padding:22px 26px;text-align:center;max-width:380px;width:90%}
+.ov-score{font-family:'Orbitron',monospace;font-size:19px;color:var(--gold);margin-bottom:3px}
+.ov-meta{font-size:11px;color:var(--muted);margin-bottom:6px}
+/* Statistik-rad i game over */
+.ov-stats{display:flex;gap:6px;justify-content:center;margin-bottom:12px;flex-wrap:wrap;}
+.stat-chip{padding:4px 10px;border:1px solid var(--line);border-radius:8px;
+  font-size:11px;font-weight:700;background:rgba(0,0,0,.3);}
+.stat-chip.good{border-color:rgba(0,255,136,.4);color:var(--accent);}
+.stat-chip.bad{border-color:rgba(255,51,85,.35);color:#ff6677;}
+.stat-chip.neutral{color:var(--muted);}
+.ov-inp{width:100%;background:rgba(0,0,0,.5);border:2px solid var(--line);border-radius:10px;
+        color:var(--text);font-family:'Exo 2',sans-serif;font-size:15px;font-weight:700;
+        padding:9px 13px;margin-bottom:12px;text-align:center}
+.ov-inp:focus{outline:none;border-color:var(--accent)}
+.ov-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.ov-btn{padding:9px 18px;border:2px solid var(--line);border-radius:11px;
+        background:var(--panel);color:var(--text);font-family:'Exo 2',sans-serif;
+        font-size:13px;font-weight:800;cursor:pointer;transition:.12s}
+.ov-btn:hover{border-color:var(--accent);color:var(--accent)}
+.ov-btn.primary{border-color:var(--accent);background:rgba(0,255,136,.1);color:var(--accent)}
+.ov-btn.primary:hover{background:rgba(0,255,136,.2)}
+.flash-good,.flash-bad{position:fixed;inset:0;pointer-events:none;z-index:50;opacity:0;transition:opacity .08s}
+.flash-good{background:rgba(0,255,136,.09)} .flash-bad{background:rgba(255,51,85,.15)}
+.flash-good.show,.flash-bad.show{opacity:1}
+
+/* ── MEDAL TOAST ── */
+#medalToast{position:fixed;right:18px;top:18px;z-index:200;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
+.medal-toast-item{background:var(--toast-bg);border:1px solid var(--accent);border-radius:12px;
+  padding:10px 16px;display:flex;align-items:center;gap:10px;min-width:220px;
+  box-shadow:0 0 20px rgba(0,255,136,.25);
+  animation:toastIn .3s ease,toastOut .4s ease 2.6s forwards;}
+@keyframes toastIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+@keyframes toastOut{from{opacity:1}to{opacity:0;transform:translateX(40px)}}
+.mt-emoji{font-size:26px}.mt-text{display:flex;flex-direction:column}
+.mt-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+.mt-name{font-size:13px;font-weight:800;color:var(--accent)}
+.mt-desc{font-size:10px;color:var(--text);opacity:.8}
+
+/* ── COPYRIGHT ── */
+.copyright{position:fixed;bottom:4px;width:100%;text-align:center;font-size:13px;line-height:1.5;
+  color:var(--text);opacity:.7;pointer-events:none;z-index:5;letter-spacing:.06em;
+  font-family:'Exo 2',sans-serif;text-shadow:0 0 8px rgba(0,255,100,.35);}
+#gameScreen.active ~ .copyright,
+#settingsScreen.active ~ .copyright,
+#medalsScreen.active ~ .copyright,
+#hsScreen.active ~ .copyright,
+#skinsScreen.active ~ .copyright{display:none}
+@media(max-height:660px){.menu-sub{margin-bottom:6px}.menu-cols{gap:7px}.play-btn{margin-bottom:5px}}
+
+
+/* ── MENY NAV-GRID ── */
+.menu-nav-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:400px;margin-top:2px;}
+.menu-nav-btn{
+  padding:8px 6px;border:1px solid var(--line);border-radius:12px;background:var(--panel);
+  color:var(--muted);font-family:'Exo 2',sans-serif;font-weight:800;cursor:pointer;
+  transition:.15s;display:flex;flex-direction:column;align-items:center;gap:4px;
+  min-height:84px;justify-content:center;
+}
+.menu-nav-btn:hover{border-color:var(--accent);background:rgba(0,255,136,.07);}
+.menu-nav-btn .mn-label,.menu-nav-btn span{font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.06em;text-transform:uppercase;}
+.menu-nav-btn .mn-count{font-size:11px;color:var(--muted);font-weight:400;}
+.menu-nav-btn .mn-emoji{font-size:26px;line-height:1.2;}
+
+/* ── MOBIL STÅENDE LÄGE ── */
+@media(max-width:560px){
+  /* Skärmar */
+  .screen{justify-content:flex-start;padding:0;}
+  #menuScreen{justify-content:space-evenly;padding:0 8px 44px;}
+  #gameScreen{justify-content:center;padding:4px 4px 0;}
+
+  /* ── Spelarrad ── */
+  .player-bar{
+    justify-content:flex-start;align-items:center;gap:8px;
+    padding:0;margin-bottom:0;width:100%;max-width:400px;
+  }
+  #playerGreeting{font-size:15px;flex:1;min-width:0;}
+  .player-bar button{height:44px;font-size:14px;padding:0 14px;border-radius:10px;white-space:nowrap;flex-shrink:0;}
+
+  /* ── Logo & text ── */
+  img[alt="Matte-ormen"]{width:min(280px,76vw)!important;margin-top:4px;margin-bottom:4px;}
+  .menu-sub{font-size:13px;margin-bottom:10px;}
+
+  /* ── Snabbval ── */
+  .panel-title{font-size:12px;letter-spacing:.1em;margin-bottom:6px;}
+  .preset-btn{min-height:46px;font-size:15px;padding:10px 12px;}
+  #menuSettingsSummary{font-size:12px;margin-top:6px;}
+
+  /* ── Starta ── */
+  .play-btn{width:100%;padding:15px 0;font-size:19px;margin-top:4px;margin-bottom:10px;}
+
+  /* ── Nav-grid ── */
+  .menu-nav-grid{gap:8px;padding:0 2px;}
+  .menu-nav-btn{min-height:86px;border-radius:12px;padding:10px 6px;}
+  .menu-nav-btn .mn-emoji{font-size:26px;}
+  .menu-nav-btn .mn-label,.menu-nav-btn span{font-size:12px;margin-top:2px;}
+  .menu-nav-btn .mn-count{font-size:11px;}
+
+  /* ── Inställningar ── */
+  .menu-cols{flex-direction:column!important;gap:8px;align-items:stretch;}
+  .menu-panel{min-width:unset!important;max-width:unset!important;width:100%;}
+  .op-btn{padding:14px 6px;font-size:22px;}
+  .range-btn,.speed-btn,.toggle-btn,.tq-btn{min-height:48px;font-size:14px;padding:12px 10px;}
+  .tb-btn{min-height:42px;font-size:13px;}
+  .panel-desc{font-size:13px;line-height:1.6;}
+
+  /* ── Undersidor ── */
+  .back-btn{font-size:15px;min-height:44px;padding:10px 16px;}
+  .mp-title{font-size:19px;}
+  .mp-count{font-size:13px;}
+  .medals-page{padding:8px 6px 60px;}
+  .medal-badge{min-width:unset;width:100%;padding:10px 14px;}
+  .medal-badge .m-name{font-size:13px;}
+  .medal-badge .m-desc{font-size:11px;}
+  .medals-cat-title{font-size:12px;}
+  .hs-row{padding:8px 4px;}
+  .hs-score{font-size:15px;}
+  .hs-name,.hs-rank{font-size:14px;}
+  .hs-meta{font-size:12px;}
+  .export-btn{font-size:14px;padding:10px 14px;min-height:44px;}
+  .skin-card{min-width:unset;width:100%;}
+  .skin-name{font-size:14px;}
+  .hint-row{display:none!important;}
+  .menu-bottom{flex-direction:column;max-width:100%;}
+  .medals-nav-btn{min-width:unset!important;width:100%;}
+}
+  #gameScreen{justify-content:center;padding:4px 4px 0;}
+  #playerGreeting{font-size:17px;}
+  img[alt="Matte-ormen"]{width:min(300px,82vw)!important;}
+  .menu-sub{font-size:14px;margin-bottom:8px;}
+  .preset-btn{min-height:48px;font-size:15px;padding:10px 14px;}
+  .panel-title{font-size:13px;letter-spacing:.1em;}
+  .play-btn{width:100%;padding:16px 0;font-size:20px;margin-bottom:12px;}
+  .menu-nav-grid{gap:10px;}
+  .menu-nav-btn{min-height:90px;}
+  .menu-nav-btn .mn-emoji{font-size:28px;}
+  .menu-nav-btn .mn-label,.menu-nav-btn span{font-size:13px;}
+  .menu-nav-btn .mn-count{font-size:12px;}
+  .menu-cols{flex-direction:column!important;gap:8px;align-items:stretch;}
+  .menu-panel{min-width:unset!important;max-width:unset!important;width:100%;}
+  .op-btn{padding:14px 6px;font-size:22px;}
+  .range-btn,.speed-btn,.toggle-btn,.tq-btn{min-height:48px;font-size:14px;padding:12px 10px;}
+  .tb-btn{min-height:42px;font-size:13px;padding:8px 6px;}
+  .panel-desc{font-size:13px;line-height:1.6;}
+  #speedDesc{font-size:13px;}
+  .back-btn{font-size:15px;min-height:44px;padding:10px 16px;}
+  .mp-title{font-size:20px;}
+  .mp-count{font-size:13px;}
+  .medals-page{padding:8px 4px 60px;}
+  .medal-badge{min-width:unset;width:100%;padding:10px 14px;}
+  .medal-badge .m-name{font-size:13px;}
+  .medal-badge .m-desc{font-size:11px;}
+  .medals-cat-title{font-size:12px;}
+  .hs-row{padding:8px 4px;font-size:14px;}
+  .hs-score{font-size:15px;}
+  .hs-name{font-size:14px;}
+  .hs-meta{font-size:12px;}
+  .hs-rank{font-size:16px;}
+  .export-btn{font-size:14px;padding:10px 16px;min-height:44px;}
+  .skin-card{min-width:unset;width:100%;}
+  .skin-name{font-size:14px;}
+  .skin-unlock{font-size:11px;}
+  .hint-row{display:none!important;}
+  .menu-bottom{flex-direction:column;max-width:100%;}
+  .hs-panel{min-width:unset!important;width:100%;}
+  .medals-nav-btn{min-width:unset!important;width:100%;}
+}
+  #gameScreen{justify-content:center;padding:4px 4px 0;}
+  .menu-cols{flex-direction:column!important;gap:8px;align-items:stretch;}
+  .menu-panel{min-width:unset!important;max-width:unset!important;width:100%;}
+  .op-btn{padding:13px 6px;font-size:20px;}
+  .preset-btn,.range-btn,.speed-btn,.toggle-btn,.tq-btn{min-height:44px;font-size:13px;padding:10px 10px;}
+  .tb-btn{min-height:40px;padding:6px 6px;}
+  .play-btn{width:100%;padding:14px 0;font-size:18px;margin-bottom:10px;}
+  .menu-bottom{flex-direction:column;max-width:100%;}
+  .hs-panel{min-width:unset!important;width:100%;}
+  .medals-nav-btn{min-width:unset!important;width:100%;}
+  .hint-row{display:none!important;}
+  img[alt="Matte-ormen"]{width:min(320px,88vw)!important;}
+}
+</style>
+</head>
+<body>
+<audio id="titelMusic" src="matteormen_titel.mp3"  loop preload="auto"></audio>
+<audio id="bgMusic"   src="matteormen_musik.mp3"  loop preload="auto"></audio>
+<audio id="fastMusic" src="matteormen_snabb.mp3"  loop preload="auto"></audio>
+
+<!-- NAMNMODAL -->
+<div class="overlay" id="nameModal">
+  <div class="ov-card">
+    <div class="lang-row">
+      <button class="lang-btn sel" id="btnLangSv">🇸🇪 Svenska</button>
+      <button class="lang-btn" id="btnLangEn">🇬🇧 English</button>
+    </div>
+    <div class="ov-title" id="nameModalTitle" style="font-size:30px;margin-bottom:8px">👋 Hej!</div>
+    <div class="ov-meta" id="nameModalSub">Vad heter du? Ditt namn sparas på din dator.</div>
+    <input class="ov-inp" id="nameModalInp" maxlength="20" placeholder="Skriv ditt namn…">
+    <div class="ov-btns"><button class="ov-btn primary" id="btnNameOk">Spela! 🐍</button></div>
+  </div>
+</div>
+
+<!-- ══ MENYSIDA ══ -->
+<div class="screen active" id="menuScreen">
+  <div class="player-bar" id="playerBar">
+    <span id="playerGreeting"></span>
+    <button id="btnChangeName">✏️ Byt namn</button>
+    <button id="btnMenuMusic">🔊 Musik</button>
+  </div>
+  <img src="matteormen_banner.png"
+       style="width:min(290px,76vw);margin-bottom:5px;filter:drop-shadow(0 0 22px rgba(0,200,80,.5))"
+       alt="Matte-ormen">
+  <div class="menu-sub" id="menuSub">Ät rätt svar — väx! Fel svar — krymper!</div>
+  <div style="width:100%;max-width:400px;margin-bottom:8px;margin-top:4px;padding:0 8px;">
+    <div class="panel-title" style="margin-bottom:5px;">⚡ Snabbval</div>
+    <div class="grade-row" id="gradeRow"></div>
+    <div id="menuSettingsSummary" style="font-size:11px;color:var(--muted);margin-top:5px;text-align:center;min-height:16px;"></div>
+  </div>
+  <button class="play-btn" id="btnPlay">▶ STARTA SPELET</button>
+  <div class="menu-nav-grid">
+    <button class="menu-nav-btn" id="btnGoSettings">⚙️<span>Inställningar</span></button>
+    <button class="menu-nav-btn" id="btnGoMedals"><div class="mn-emoji">🏅</div><div class="mn-label">MEDALJER</div><div class="mn-count" id="medalsBtnCount">0 / 0</div></button>
+    <button class="menu-nav-btn" id="btnGoSkins"><div class="mn-emoji">🎨</div><div id="skinsBtnLabel">ORMSKINN</div><div class="mn-count" id="skinsBtnCount">0 / 0</div></button>
+    <button class="menu-nav-btn" id="btnGoHS"><div class="mn-emoji">🏆</div><span>Highscore</span></button>
+  </div>
+  <div id="menuHs" style="display:none"></div>
+</div>
+
+<!-- ══ INSTÄLLNINGAR-SIDA ══ -->
+<div class="screen" id="settingsScreen">
+  <div class="medals-page">
+    <div class="medals-page-top">
+      <button class="back-btn" id="btnBackFromSettings">← Tillbaka</button>
+      <div class="mp-title">⚙️ INSTÄLLNINGAR</div>
+    </div>
+    <div style="width:100%;max-width:600px;">
+      <div class="menu-panel" style="margin-bottom:10px;">
+        <div class="panel-title">🔢 Räknesätt</div>
+        <div class="op-grid">
+          <button class="op-btn sel" data-op="+">+</button>
+          <button class="op-btn sel" data-op="-">−</button>
+          <button class="op-btn" data-op="*">×</button>
+          <button class="op-btn" data-op="/">÷</button>
+        </div>
+      </div>
+      <div class="menu-panel" style="margin-bottom:10px;">
+        <div class="panel-title">📏 Talområde (för + och −)</div>
+        <div class="range-row">
+          <button class="range-btn" data-r="10">Inom 10</button>
+          <button class="range-btn sel" data-r="20">Upp till 20</button>
+          <button class="range-btn" data-r="100">Upp till 100</button>
+          <button class="range-btn" data-r="1000">Upp till 1000</button>
+        </div>
+        <div class="range-hint" id="rangeHint"></div>
+      </div>
+      <div class="menu-panel" id="tablePanel" style="display:none;margin-bottom:10px;">
+        <div class="panel-title">✖️ Multiplikationstabeller</div>
+        <div class="panel-desc" id="tableDescQuick">Snabbval:</div>
+        <div class="table-quick">
+          <button class="tq-btn" data-tq="2,5,10">×2, 5, 10</button>
+          <button class="tq-btn" data-tq="2,3,4,5,6,10">×2–6 och 10</button>
+          <button class="tq-btn" data-tq="1,2,3,4,5,6,7,8,9,10">×1–10</button>
+          <button class="tq-btn" data-tq="1,2,3,4,5,6,7,8,9,10,11,12">×1–12</button>
+        </div>
+        <div class="panel-desc" id="tableDescIndiv">Välj enskilda:</div>
+        <div class="table-grid" id="tableGrid"></div>
+      </div>
+      <div class="menu-panel" style="margin-bottom:10px;">
+        <div class="panel-title">🏃 Hastighetsökning</div>
+        <div class="speed-row">
+          <button class="speed-btn sel" data-sm="none">Ingen ändring</button>
+          <button class="speed-btn" data-sm="score">⬆ Poängbaserad</button>
+          <button class="speed-btn" data-sm="length">⬆ Längdbaserad</button>
+        </div>
+        <div class="panel-desc" id="speedDesc">Konstant hastighet hela spelet.</div>
+        <div class="panel-title" style="margin-top:9px;">🧱 Väggar</div>
+        <div class="toggle-row">
+          <button class="toggle-btn sel" data-ww="false">☠️ Dör av väggar</button>
+          <button class="toggle-btn" data-ww="true">🔄 Runda väggar</button>
+        </div>
+      </div>
+      <div class="menu-panel" style="margin-bottom:10px;">
+        <div class="panel-title">🎮 Spelläge</div>
+        <div class="toggle-row">
+          <button class="toggle-btn mode-btn sel" data-mode="standard">⚔️ Standard</button>
+          <button class="toggle-btn mode-btn" data-mode="practice">📚 Övning</button>
+        </div>
+        <div class="panel-desc" id="modeDesc">3 liv. Fel svar krymper ormen och tappar ett liv.</div>
+      </div>
+      <div class="menu-panel" style="margin-bottom:24px;">
+        <div class="panel-title">🎨 Utseende</div>
+        <div class="toggle-row" style="flex-wrap:wrap;gap:5px;">
+          <button class="toggle-btn theme-btn sel" data-theme="natt">🌑 Natt</button>
+          <button class="toggle-btn theme-btn" data-theme="skog">🌿 Skog</button>
+          <button class="toggle-btn theme-btn" data-theme="hav">🌊 Hav</button>
+          <button class="toggle-btn theme-btn" data-theme="solnedgang">🌅 Solnedgång</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MEDALJER-SIDA ══ -->
+<div class="screen" id="medalsScreen">
+  <div class="medals-page">
+    <div class="medals-page-top">
+      <button class="back-btn" id="btnBackFromMedals">← Tillbaka</button>
+      <div class="mp-title" id="mpTitleEl">🏅 MINA MEDALJER</div>
+      <div class="mp-count" id="mpCount"></div>
+    </div>
+    <div id="medalsPageContent"></div>
+  </div>
+</div>
+
+<!-- ══ HIGHSCORE-SIDA ══ -->
+<div class="screen" id="hsScreen">
+  <div class="medals-page">
+    <div class="medals-page-top">
+      <button class="back-btn" id="btnBackFromHS">← Tillbaka</button>
+      <div class="mp-title">🏆 HIGHSCORE</div>
+      <div class="mp-count" id="hsPageCount"></div>
+    </div>
+    <div id="hsPageContent"></div>
+    <div class="export-row" style="margin-top:12px">
+      <button class="export-btn" id="btnExport">💾 Spara medaljer &amp; highscore</button>
+      <button class="export-btn" id="btnImport">📂 Ladda in sparfil</button>
+      <button class="export-btn" id="btnClearHS">🗑️ Rensa highscore</button>
+      <input type="file" id="importFile" accept=".json" style="display:none">
+    </div>
+  </div>
+</div>
+
+<!-- ══ ORMSKINN-SIDA ══ -->
+<div class="screen" id="skinsScreen">
+  <div class="medals-page">
+    <div class="medals-page-top">
+      <button class="back-btn" id="btnBackFromSkins">← Tillbaka</button>
+      <div class="mp-title" id="skinsTitleEl">🎨 ORMSKINN</div>
+      <div class="mp-count" id="skinsPageCount"></div>
+    </div>
+    <div id="skinsPageContent" class="skins-grid"></div>
+  </div>
+</div>
+
+<!-- ══ SPELSKÄRM ══ -->
+<div class="screen" id="gameScreen">
+  <div class="game-wrap">
+    <div class="game-top">
+      <div class="g-stat" id="statPoang">POÄNG<span id="scoreDisp">0</span></div>
+      <div style="text-align:center">
+        <div class="g-lives" id="livesDisp"></div>
+        <div class="combo" id="comboDisp"></div>
+      </div>
+      <div class="g-stat" style="text-align:right" id="statLage">LÄGE<span id="levelDisp"></span></div>
+    </div>
+    <div class="eq-bar"><div class="eq-text" id="eqText">? + ? = ?</div></div>
+    <canvas id="c"></canvas>
+    <div id="touchControls">
+      <div class="dpad-row">
+        <div class="dpad-center"></div>
+        <button class="dpad-btn" id="dUp">▲</button>
+        <div class="dpad-center"></div>
+      </div>
+      <div class="dpad-row">
+        <button class="dpad-btn" id="dLeft">◀</button>
+        <div class="dpad-center"></div>
+        <button class="dpad-btn" id="dRight">▶</button>
+      </div>
+      <div class="dpad-row">
+        <div class="dpad-center"></div>
+        <button class="dpad-btn" id="dDown">▼</button>
+        <div class="dpad-center"></div>
+      </div>
+    </div>
+    <div class="hint-row" id="hintRow"><span><span class="hk">↑↓←→</span> WASD</span><span><span class="hk">P</span> <span id="hintPause">paus</span></span><span><span class="hk">ESC</span> <span id="hintMenu">meny</span></span><span><span class="hk">M</span> <span id="hintMusic">musik</span></span></div>
+  </div>
+</div>
+
+
+<!-- Overlays -->
+<div class="overlay" id="pauseOverlay">
+  <div class="ov-title" id="pauseTitle">PAUS</div>
+  <div class="ov-btns">
+    <button class="ov-btn primary" id="btnResume">▶ Fortsätt</button>
+    <button class="ov-btn" id="btnPauseMenu">Meny</button>
+  </div>
+</div>
+<div class="overlay" id="gameoverOverlay">
+  <div class="ov-card">
+    <div class="ov-title bad" style="font-size:27px;margin-bottom:8px">GAME OVER</div>
+    <div class="ov-score" id="goScore"></div>
+    <div class="ov-meta" id="goMeta"></div>
+    <div class="ov-stats" id="goStats"></div>
+    <input class="ov-inp" id="hsNameInp" maxlength="20" placeholder="Ditt namn för highscore…">
+    <div class="ov-btns">
+      <button class="ov-btn primary" id="btnSaveScore">💾 Spara poäng</button>
+      <button class="ov-btn" id="btnGoMenu">Hoppa över</button>
+    </div>
+  </div>
+</div>
+<div class="flash-good" id="flashGood"></div>
+<div class="flash-bad"  id="flashBad"></div>
+<div id="medalToast"></div>
+<div class="copyright" id="copyrightEl">© 2026 Andreas Jonsson – Skapad med Claude AI 🐍 &nbsp;·&nbsp; v3.0</div>
+
+<script>
+/* ═══════════════════════════════════════
+   KONSTANTER
+   ═══════════════════════════════════════ */
+const COLS=12,ROWS=20; let CELL=24;
+const HS_KEY='mattormen_v3_hs', PLAYER_KEY='mattormen_player',
+      MEDALS_KEY='mattormen_medals_v1', OP_SCORES_KEY='mattormen_op_scores',
+      STATS_KEY='mattormen_stats', LANG_KEY='mattormen_lang',
+      SKINS_KEY='mattormen_skins_v1', ACTIVE_SKIN_KEY='mattormen_active_skin',
+      ACTIVE_HEAD_KEY='mattormen_head_acc';
+
+// RANGE_HINTS är nu i STRINGS — se t('rangeHint10') etc.
+// SPEED_DESCS är nu i STRINGS — se t('speedDescNone') etc.
+
+/* ═══════════════════════════════════════
+   SPRÅK / LANGUAGE
+   ═══════════════════════════════════════ */
+const STRINGS={
+  sv:{
+    greeting:'Hej, {name}! 👋',
+    changeName:'✏️ Byt namn',
+    menuMusic:'🔊 Musik',
+    menuMusicOff:'🔇 Musik',
+    menuSub:'Ät rätt svar — väx! Fel svar — krymper!',
+    panelPreset:'⚡ Snabbval (sätter standardvärden)',
+    panelOps:'🔢 Räknesätt',
+    panelRange:'📏 Talområde (för + och −)',
+    panelTables:'✖️ Multiplikationstabeller',
+    panelTableQuick:'Snabbval:',
+    panelTableIndiv:'Välj enskilda:',
+    panelSpeed:'🏃 Hastighetsökning',
+    panelWalls:'🧱 Väggar',
+    speedNone:'Ingen ändring',
+    speedScore:'⬆ Poängbaserad',
+    speedLength:'⬆ Längdbaserad',
+    speedDescNone:'Konstant hastighet hela spelet.',
+    speedDescScore:'Ormen snabbas upp ju fler poäng du samlar.',
+    speedDescLength:'Ormen snabbas upp ju längre den blir.',
+    wallDie:'☠️ Dör av väggar',
+    wallWrap:'🔄 Runda väggar',
+    rangeHint10:'Ex: 3+4, 9−5, 1+8',
+    rangeHint20:'Ex: 8+5, 14−7, 9+7 (överbryggning)',
+    rangeHint100:'Ex: 23+45, 71−38, 56+19',
+    rangeHint1000:'Ex: 234+185, 730−264, 450+320',
+    rangeW10:'Inom 10',rangeW20:'Upp till 20',rangeW100:'Upp till 100',rangeW1000:'Upp till 1000',
+    btnPlay:'▶ STARTA SPELET',
+    hsTitle:'🏆 HIGHSCORE',
+    hsShowAll:'— visa alla →',
+    hsEmpty:'Inga poäng ännu — var den första! 🐍',
+    medalsLabel:'MINA MEDALJER',
+    medalsCount:'{n} / {tot} upplåsta',
+    btnExport:'💾 Spara medaljer & highscore',
+    btnImport:'📂 Ladda in sparfil',
+    statPoang:'POÄNG',statLage:'LÄGE',
+    hintPause:'paus',hintMenu:'meny',hintMusic:'musik',
+    pauseTitle:'PAUS',btnResume:'▶ Fortsätt',btnPauseMenu:'Meny',
+    gameOver:'GAME OVER',
+    hsPlaceholder:'Ditt namn för highscore…',
+    btnSaveScore:'💾 Spara poäng',btnGoMenu:'Hoppa över',
+    nameModalTitle:'👋 Hej!',
+    nameModalSub:'Vad heter du? Ditt namn sparas på din dator.',
+    nameModalBtn:'Spela! 🐍',
+    nameModalInpPlaceholder:'Skriv ditt namn…',
+    btnBack:'← Tillbaka',
+    mpTitle:'🏅 MINA MEDALJER',
+    hsPageTitle:'🏆 HIGHSCORE',
+    btnClearHS:'🗑️ Rensa highscore',
+    comboBonus:'🔥 Combo ×{n} (+{b} bonus)',
+    comboGold:'💡 Titta på guldsvaret!',
+    chipCorrect:'✅ {c} rätt av {t}',
+    chipPct:'{p}% träffsäkerhet',
+    chipPractice:'🔁 {n} frågor att öva',
+    newRecord:'🏆 Nytt rekord!',
+    copyright:'© 2026 Andreas Jonsson – Skapad med Claude AI 🐍 &nbsp;·&nbsp; v3.0<br><span style="font-size:10px;opacity:.6">Idéer & feedback: Cecilia Norlander</span>',
+    skinsBtnLabel:'ORMSKINN',
+    skinsTitle:'🎨 ORMSKINN',
+    skinsCount:'{n} / {tot} upplåsta',
+    skinActive:'AKTIV',
+    skinUnlockedToast:'Ormskinn upplåst!',
+    skinFree:'Tillgänglig från start',
+    headAccOn:'🎭 Huvuddekoration: PÅ',
+    headAccOff:'🎭 Huvuddekoration: AV',
+    seasonalActive:'Årstidsläge aktivt:',
+  },
+  en:{
+    greeting:'Hi, {name}! 👋',
+    changeName:'✏️ Change name',
+    menuMusic:'🔊 Music',
+    menuMusicOff:'🔇 Music',
+    menuSub:'Eat the right answer — grow! Wrong answer — shrink!',
+    panelPreset:'⚡ Quick select (sets defaults)',
+    panelOps:'🔢 Operations',
+    panelRange:'📏 Number range (for + and −)',
+    panelTables:'✖️ Multiplication tables',
+    panelTableQuick:'Quick select:',
+    panelTableIndiv:'Choose individual:',
+    panelSpeed:'🏃 Speed increase',
+    panelWalls:'🧱 Walls',
+    speedNone:'No change',
+    speedScore:'⬆ Score based',
+    speedLength:'⬆ Length based',
+    speedDescNone:'Constant speed throughout the game.',
+    speedDescScore:'The snake speeds up the more points you collect.',
+    speedDescLength:'The snake speeds up the longer it gets.',
+    wallDie:'☠️ Die on walls',
+    wallWrap:'🔄 Wrap around',
+    rangeHint10:'E.g: 3+4, 9−5, 1+8',
+    rangeHint20:'E.g: 8+5, 14−7, 9+7 (bridging)',
+    rangeHint100:'E.g: 23+45, 71−38, 56+19',
+    rangeHint1000:'E.g: 234+185, 730−264, 450+320',
+    rangeW10:'Within 10',rangeW20:'Up to 20',rangeW100:'Up to 100',rangeW1000:'Up to 1000',
+    btnPlay:'▶ START GAME',
+    hsTitle:'🏆 HIGHSCORE',
+    hsShowAll:'— show all →',
+    hsEmpty:'No scores yet — be the first! 🐍',
+    medalsLabel:'MY MEDALS',
+    medalsCount:'{n} / {tot} unlocked',
+    btnExport:'💾 Save medals & highscore',
+    btnImport:'📂 Load save file',
+    statPoang:'SCORE',statLage:'MODE',
+    hintPause:'pause',hintMenu:'menu',hintMusic:'music',
+    pauseTitle:'PAUSE',btnResume:'▶ Resume',btnPauseMenu:'Menu',
+    gameOver:'GAME OVER',
+    hsPlaceholder:'Your name for highscore…',
+    btnSaveScore:'💾 Save score',btnGoMenu:'Skip',
+    nameModalTitle:'👋 Hi!',
+    nameModalSub:"What's your name? Saved on your device.",
+    nameModalBtn:'Play! 🐍',
+    nameModalInpPlaceholder:'Type your name…',
+    btnBack:'← Back',
+    mpTitle:'🏅 MY MEDALS',
+    hsPageTitle:'🏆 HIGHSCORE',
+    btnClearHS:'🗑️ Clear highscore',
+    comboBonus:'🔥 Combo ×{n} (+{b} bonus)',
+    comboGold:'💡 Look at the gold answer!',
+    chipCorrect:'✅ {c} correct of {t}',
+    chipPct:'{p}% accuracy',
+    chipPractice:'🔁 {n} questions to practice',
+    newRecord:'🏆 New record!',
+    copyright:'© 2026 Andreas Jonsson – Created with Claude AI 🐍 &nbsp;·&nbsp; v3.0<br><span style="font-size:10px;opacity:.6">Ideas & feedback: Cecilia Norlander</span>',
+    skinsBtnLabel:'SNAKE SKINS',
+    skinsTitle:'🎨 SNAKE SKINS',
+    skinsCount:'{n} / {tot} unlocked',
+    skinActive:'ACTIVE',
+    skinUnlockedToast:'Snake skin unlocked!',
+    skinFree:'Available from the start',
+    headAccOn:'🎭 Head decoration: ON',
+    headAccOff:'🎭 Head decoration: OFF',
+    seasonalActive:'Seasonal mode active:',
+  }
+};
+function getLang(){return localStorage.getItem(LANG_KEY)||'sv';}
+function t(key,vars={}){
+  const s=STRINGS[getLang()]||STRINGS.sv;
+  let str=s[key]||STRINGS.sv[key]||key;
+  Object.entries(vars).forEach(([k,v])=>{str=str.replace('{'+k+'}',v);});
+  return str;
+}
+function setLang(lang){
+  localStorage.setItem(LANG_KEY,lang);
+  document.getElementById('btnLangSv').classList.toggle('sel',lang==='sv');
+  document.getElementById('btnLangEn').classList.toggle('sel',lang==='en');
+  applyLang();
+}
+function applyLang(){
+  const l=getLang();
+  // Namnmodal
+  $('nameModalTitle').textContent=t('nameModalTitle');
+  $('nameModalSub').textContent=t('nameModalSub');
+  $('btnNameOk').textContent=t('nameModalBtn');
+  $('nameModalInp').placeholder=t('nameModalInpPlaceholder');
+  // Menyknappar
+  $('menuSub').textContent=t('menuSub');
+  $('btnPlay').textContent=t('btnPlay');
+  $('btnChangeName').textContent=t('changeName');
+  updateMenuMusicBtn();
+  // Meny panel-titlar via querySelectorAll (index-baserat)
+  const pts=document.querySelectorAll('.panel-title');
+  if(pts[0])pts[0].textContent=t('panelPreset');
+  if(pts[1])pts[1].textContent=t('panelOps');
+  if(pts[2])pts[2].textContent=t('panelRange');
+  if(pts[3])pts[3].textContent=t('panelTables');
+  if(pts[4])pts[4].textContent=t('panelSpeed');
+  if(pts[5])pts[5].textContent=t('panelWalls');
+  // Range buttons
+  document.querySelectorAll('.range-btn').forEach(b=>{
+    const r=b.dataset.r;
+    const map={'10':t('rangeW10'),'20':t('rangeW20'),'100':t('rangeW100'),'1000':t('rangeW1000')};
+    if(map[r])b.textContent=map[r];
+  });
+  // Speed buttons
+  const sbs=document.querySelectorAll('.speed-btn');
+  if(sbs[0])sbs[0].textContent=t('speedNone');
+  if(sbs[1])sbs[1].textContent=t('speedScore');
+  if(sbs[2])sbs[2].textContent=t('speedLength');
+  updateRangeHint();
+  // Toggle (wall) buttons
+  const tbs=document.querySelectorAll('.toggle-btn');
+  if(tbs[0])tbs[0].textContent=t('wallDie');
+  if(tbs[1])tbs[1].textContent=t('wallWrap');
+  // Play/HS/Medals
+  $('btnExport').textContent=t('btnExport');
+  $('btnImport').textContent=t('btnImport');
+  // Game screen
+  if($('statPoang')&&$('statPoang').childNodes[0]){$('statPoang').childNodes[0].nodeValue=t('statPoang');}
+  if($('statLage')&&$('statLage').childNodes[0]){$('statLage').childNodes[0].nodeValue=t('statLage');}
+  if($('tableDescQuick'))$('tableDescQuick').textContent=t('panelTableQuick');
+  if($('tableDescIndiv'))$('tableDescIndiv').textContent=t('panelTableIndiv');
+  if($('hintPause'))$('hintPause').textContent=t('hintPause');
+  if($('hintMenu'))$('hintMenu').textContent=t('hintMenu');
+  if($('hintMusic'))$('hintMusic').textContent=t('hintMusic');
+  // Pausoverlay
+  if($('pauseTitle'))$('pauseTitle').textContent=t('pauseTitle');
+  if($('btnResume'))$('btnResume').textContent=t('btnResume');
+  if($('btnPauseMenu'))$('btnPauseMenu').textContent=t('btnPauseMenu');
+  // Game over
+  if($('hsNameInp'))$('hsNameInp').placeholder=t('hsPlaceholder');
+  if($('btnSaveScore'))$('btnSaveScore').textContent=t('btnSaveScore');
+  if($('btnGoMenu'))$('btnGoMenu').textContent=t('btnGoMenu');
+  // Medaljer / HS sidor
+  if($('btnBackFromMedals'))$('btnBackFromMedals').textContent=t('btnBack');
+  if($('btnBackFromHS'))$('btnBackFromHS').textContent=t('btnBack');
+  if($('btnBackFromSkins'))$('btnBackFromSkins').textContent=t('btnBack');
+  if($('btnClearHS'))$('btnClearHS').textContent=t('btnClearHS');
+  if($('skinsBtnLabel'))$('skinsBtnLabel').textContent=t('skinsBtnLabel');
+  updateSkinNavBtn();
+  // HS panel show-all text
+  const hsShowAll=document.querySelector('#btnGoHS .hs-title');
+  if(hsShowAll)hsShowAll.innerHTML=t('hsTitle')+' <span style="font-size:9px;color:var(--muted);letter-spacing:.05em">'+t('hsShowAll')+'</span>';
+  // Medaljer nav
+  const mnLabel=document.querySelector('.mn-label');
+  if(mnLabel)mnLabel.textContent=t('medalsLabel');
+  // Medals/HS page titles
+  if($('mpTitleEl'))$('mpTitleEl').textContent=t('mpTitle');
+  if($('copyrightEl'))$('copyrightEl').innerHTML=t('copyright');
+  // Speed description (uppdatera med nuvarande speedMode)
+  const _sdMap={none:t('speedDescNone'),score:t('speedDescScore'),length:t('speedDescLength')};
+  if($('speedDesc'))$('speedDesc').textContent=_sdMap[speedMode]||'';
+  renderHS();updateMedalNavBtn();
+}
+
+const GRADES={
+  1:{label:'Åk 1',labelEn:'Yr 1',ops:['+','-'],          range:10,  tbls:[]},
+  2:{label:'Åk 2',labelEn:'Yr 2',ops:['+','-','*','/'],  range:20,  tbls:[2,5,10]},
+  3:{label:'Åk 3',labelEn:'Yr 3',ops:['+','-','*','/'],  range:20,  tbls:[2,3,4,5,6,10]},
+  4:{label:'Åk 4',labelEn:'Yr 4',ops:['+','-','*','/'],  range:100, tbls:[1,2,3,4,5,6,7,8,9,10]},
+  5:{label:'Åk 5',labelEn:'Yr 5',ops:['+','-','*','/'],  range:100, tbls:[1,2,3,4,5,6,7,8,9,10,11,12]},
+  6:{label:'Åk 6',labelEn:'Yr 6',ops:['+','-','*','/'],  range:1000,tbls:[1,2,3,4,5,6,7,8,9,10,11,12]},
+};
+
+/* ═══════════════════════════════════════
+   MEDALJER (21 st)
+   ═══════════════════════════════════════ */
+const MEDALS_DEF=[
+  {id:'p500',    emoji:'⭐',name:'500 Poäng',              desc:'Nå 500 poäng i ett spel',                     cat:'🏅 Poäng', nameEn:'500 Points', descEn:'Score 500 points in one game'},
+  {id:'p2000',   emoji:'🌟',name:'2 000 Poäng',            desc:'Nå 2 000 poäng i ett spel',                   cat:'🏅 Poäng', nameEn:'2,000 Points', descEn:'Score 2,000 points in one game'},
+  {id:'p5000',   emoji:'🏆',name:'5 000 Poäng',            desc:'Nå 5 000 poäng i ett spel',                   cat:'🏅 Poäng', nameEn:'5,000 Points', descEn:'Score 5,000 points in one game'},
+  {id:'p10000',  emoji:'👑',name:'10 000 Poäng',           desc:'Nå 10 000 poäng i ett spel',                  cat:'🏅 Poäng', nameEn:'10,000 Points', descEn:'Score 10,000 points in one game'},
+  {id:'add1000', emoji:'➕',name:'Additionshjälte',        desc:'Tjäna 1 000p på additionstal (alla spel)',     cat:'🔢 Räknesätt', nameEn:'Addition Hero', descEn:'Earn 1,000pts on addition (all games)'},
+  {id:'sub1000', emoji:'➖',name:'Subtraktionshjälte',     desc:'Tjäna 1 000p på subtraktionstal (alla spel)',  cat:'🔢 Räknesätt', nameEn:'Subtraction Hero', descEn:'Earn 1,000pts on subtraction (all games)'},
+  {id:'mul500',  emoji:'✖️',name:'Multiplikationsmästare', desc:'Tjäna 500p på multiplikationstal (alla spel)', cat:'🔢 Räknesätt', nameEn:'Multiplication Master', descEn:'Earn 500pts on multiplication (all games)'},
+  {id:'div500',  emoji:'➗',name:'Divisionsmästare',       desc:'Tjäna 500p på divisionstal (alla spel)',       cat:'🔢 Räknesätt', nameEn:'Division Master', descEn:'Earn 500pts on division (all games)'},
+  {id:'c5',      emoji:'🔥',name:'Hetsar på!',             desc:'5 rätt i rad',                                 cat:'🔥 Combo', nameEn:'Heating Up!', descEn:'5 correct in a row'},
+  {id:'c10',     emoji:'💎',name:'Oöverträffad',           desc:'10 rätt i rad',                                cat:'🔥 Combo', nameEn:'Unbeatable', descEn:'10 correct in a row'},
+  {id:'c15',     emoji:'⚡',name:'Blixtfingrar',           desc:'15 rätt i rad',                                cat:'🔥 Combo', nameEn:'Lightning Fingers', descEn:'15 correct in a row'},
+  {id:'c20',     emoji:'🌊',name:'På vågen!',              desc:'20 rätt i rad',                                cat:'🔥 Combo', nameEn:'On a Roll!', descEn:'20 correct in a row'},
+  {id:'c25',     emoji:'🎯',name:'Prickskytt',             desc:'25 rätt i rad',                                cat:'🔥 Combo', nameEn:'Sharpshooter', descEn:'25 correct in a row'},
+  {id:'c30',     emoji:'🚀',name:'Raketstart',             desc:'30 rätt i rad',                                cat:'🔥 Combo', nameEn:'Rocketstart', descEn:'30 correct in a row'},
+  {id:'c50',     emoji:'🦁',name:'Lejonhjärta',            desc:'50 rätt i rad',                                cat:'🔥 Combo', nameEn:'Lionheart', descEn:'50 correct in a row'},
+  {id:'c75',     emoji:'🌟',name:'Stjärnstatus',           desc:'75 rätt i rad',                                cat:'🔥 Combo', nameEn:'Star Status', descEn:'75 correct in a row'},
+  {id:'c100',    emoji:'💯',name:'HUNDRA I RAD!',          desc:'100 rätt i rad — legendariskt!',              cat:'🔥 Combo', nameEn:'ONE HUNDRED!', descEn:'100 correct in a row — legendary!'},
+  {id:'len15',   emoji:'📏',name:'Stor orm',               desc:'Nå längd 15',                                  cat:'🐍 Orm', nameEn:'Big Snake', descEn:'Reach length 15'},
+  {id:'len25',   emoji:'🐍',name:'Jätteorm!',              desc:'Nå längd 25',                                  cat:'🐍 Orm', nameEn:'Giant Snake!',    descEn:'Reach length 25'},
+  {id:'len35',   emoji:'🦕',name:'Dinosarieorm!',          desc:'Nå längd 35',                                  cat:'🐍 Orm', nameEn:'Dinosaur Snake!', descEn:'Reach length 35'},
+  {id:'len50',   emoji:'🌍',name:'Världsrekordsorm!',      desc:'Nå längd 50 — nästan omöjligt!',               cat:'🐍 Orm', nameEn:'World Record Snake!', descEn:'Reach length 50 — nearly impossible!'},
+  {id:'osviklig',emoji:'❤️',name:'Felfri',                 desc:'10 rätt utan att tappa ett enda liv',          cat:'⭐ Special', nameEn:'Flawless', descEn:'10 correct without losing a single life'},
+  {id:'genius',  emoji:'🧠',name:'Mattegeni',              desc:'1 000p på Åk6 med alla 4 räknesätt',          cat:'⭐ Special', nameEn:'Math Genius', descEn:'1,000pts on grade 6 with all 4 operations'},
+];
+
+/* ═══════════════════════════════════════
+   ORMSKINN
+   ═══════════════════════════════════════ */
+const SKINS_DEF=[
+  {id:'klassisk', emoji:'🟢', name:'Klassisk', nameEn:'Classic',
+   free:true, unlockMedal:null,
+   headA:'#ccffe0', headB:'#00cc55', shadow:'#00ff88',
+   bodyFn:(a)=>`rgba(0,${Math.floor(130+a*125)},${Math.floor(55*a)},${Math.min(1,a+.05)})`,
+   previewCss:'linear-gradient(135deg,#ccffe0,#00cc55)'},
+  {id:'isbla', emoji:'🔵', name:'Isblå', nameEn:'Ice Blue',
+   free:true, unlockMedal:null,
+   headA:'#c0e8ff', headB:'#0077cc', shadow:'#44aaff',
+   bodyFn:(a)=>`rgba(${Math.floor(30+a*60)},${Math.floor(100+a*100)},${Math.floor(180+a*60)},${Math.min(1,a+.05)})`,
+   previewCss:'linear-gradient(135deg,#c0e8ff,#0077cc)'},
+  {id:'rosa', emoji:'🩷', name:'Rosa', nameEn:'Pink',
+   free:true, unlockMedal:null,
+   headA:'#ffd6e8', headB:'#ff3399', shadow:'#ff88bb',
+   bodyFn:(a)=>`rgba(${Math.floor(180+a*60)},${Math.floor(40+a*60)},${Math.floor(80+a*80)},${Math.min(1,a+.05)})`,
+   previewCss:'linear-gradient(135deg,#ffd6e8,#ff3399)'},
+  {id:'lila', emoji:'💜', name:'Lila', nameEn:'Purple',
+   free:true, unlockMedal:null,
+   headA:'#e8d0ff', headB:'#7722ff', shadow:'#aa55ff',
+   bodyFn:(a)=>`rgba(${Math.floor(80+a*60)},${Math.floor(20+a*30)},${Math.floor(150+a*80)},${Math.min(1,a+.05)})`,
+   previewCss:'linear-gradient(135deg,#e8d0ff,#7722ff)'},
+  {id:'regnbage', emoji:'🌈', name:'Regnbåge', nameEn:'Rainbow',
+   free:false, unlockMedal:'c25',
+   descSv:'Lås upp: Combo 25 i rad', descEn:'Unlock: Combo 25 in a row',
+   headA:'#ff8888', headB:'#8844ff', shadow:'#ffaaff',
+   bodyFn:(a)=>`rgba(${Math.floor(150+a*80)},${Math.floor(100+a*80)},${Math.floor(200+a*55)},${Math.min(1,a+.05)})`,
+   previewCss:'linear-gradient(135deg,#ff6666,#ffaa00,#88ff44,#44aaff,#9933ff)',
+   rainbow:true},
+  {id:'guld', emoji:'⭐', name:'Guld', nameEn:'Gold',
+   free:false, unlockMedal:'p2000',
+   descSv:'Lås upp: Nå 2 000 poäng', descEn:'Unlock: Reach 2,000 points',
+   headA:'#fff5a0', headB:'#cc7700', shadow:'#ffcc00',
+   bodyFn:(a)=>`rgba(${Math.floor(160+a*70)},${Math.floor(90+a*80)},0,${Math.min(1,a+.05)})`,
+   previewCss:'linear-gradient(135deg,#fff5a0,#cc7700)'},
+  {id:'kunglig', emoji:'👑', name:'Kunglig', nameEn:'Royal',
+   free:false, unlockMedal:'p5000',
+   descSv:'Lås upp: Nå 5 000 poäng', descEn:'Unlock: Reach 5,000 points',
+   headA:'#aaccff', headB:'#002299', shadow:'#3366ff',
+   bodyFn:(a)=>`rgba(${Math.floor(20+a*40)},${Math.floor(40+a*70)},${Math.floor(130+a*90)},${Math.min(1,a+.05)})`,
+   previewCss:'linear-gradient(135deg,#aaccff,#002299)'},
+  {id:'is', emoji:'❄️', name:'Is', nameEn:'Ice',
+   free:false, unlockMedal:'div500',
+   descSv:'Lås upp: Divisionsmedaljen', descEn:'Unlock: Division medal',
+   headA:'#eeffff', headB:'#66ccee', shadow:'#aaeeff',
+   bodyFn:(a)=>`rgba(${Math.floor(150+a*90)},${Math.floor(210+a*40)},${Math.floor(230+a*25)},${Math.min(1,a+.05)})`,
+   previewCss:'linear-gradient(135deg,#eeffff,#66ccee)'},
+  {id:'eld', emoji:'🔥', name:'Eld', nameEn:'Fire',
+   free:false, unlockMedal:'c50',
+   descSv:'Lås upp: Combo 50 i rad', descEn:'Unlock: Combo 50 in a row',
+   headA:'#ffff88', headB:'#ff2200', shadow:'#ff6600',
+   bodyFn:(a)=>`rgba(${Math.floor(200+a*55)},${Math.floor(60+a*60)},0,${Math.min(1,a+.05)})`,
+   previewCss:'linear-gradient(135deg,#ffff44,#ff8800,#ff2200)'},
+  {id:'midnatt', emoji:'🌙', name:'Midnatt', nameEn:'Midnight',
+   free:false, unlockMedal:'p10000',
+   descSv:'Lås upp: Nå 10 000 poäng', descEn:'Unlock: Reach 10,000 points',
+   headA:'#cc88ff', headB:'#110033', shadow:'#8833ff',
+   bodyFn:(a)=>`rgba(${Math.floor(40+a*60)},0,${Math.floor(60+a*100)},${Math.min(1,a+.05)})`,
+   previewCss:'linear-gradient(135deg,#cc88ff,#110033)'},
+  {id:'diamant', emoji:'💎', name:'Diamant', nameEn:'Diamond',
+   free:false, unlockMedal:'c100',
+   descSv:'Lås upp: Combo 100 i rad', descEn:'Unlock: Combo 100 in a row',
+   headA:'#e8f8ff', headB:'#5599ff', shadow:'#88ccff',
+   bodyFn:(a)=>`rgba(${Math.floor(100+a*120)},${Math.floor(170+a*70)},${Math.floor(220+a*35)},${Math.min(1,a+.05)})`,
+   previewCss:'linear-gradient(135deg,#e8f8ff,#99ddff,#5599ff)'},
+  {id:'smaragd', emoji:'🍀', name:'Smaragd', nameEn:'Emerald',
+   free:false, unlockMedal:'genius',
+   descSv:'Lås upp: Mattegeni-medaljen', descEn:'Unlock: Math Genius medal',
+   headA:'#aaffcc', headB:'#004422', shadow:'#00cc66',
+   bodyFn:(a)=>`rgba(0,${Math.floor(100+a*110)},${Math.floor(40+a*50)},${Math.min(1,a+.05)})`,
+   previewCss:'linear-gradient(135deg,#aaffcc,#004422)'},
+];
+
+
+/* ═══════════════════════════════════════
+   TEMAN & ÅRSTIDER
+   ═══════════════════════════════════════ */
+const SKIN_THEMES={
+  'klassisk': {bgA:'#060c08',bgB:'#030a05',gridColor:'rgba(0,255,100,.033)',particles:null,   headAcc:null},
+  'isbla':    {bgA:'#03070f',bgB:'#020510',gridColor:'rgba(80,160,255,.04)', particles:'snow',  headAcc:null},
+  'rosa':     {bgA:'#0f0308',bgB:'#0a0206',gridColor:'rgba(255,80,160,.04)', particles:null,   headAcc:null},
+  'lila':     {bgA:'#07030f',bgB:'#04020a',gridColor:'rgba(140,60,255,.04)', particles:null,   headAcc:null},
+  'regnbage': {bgA:'#050508',bgB:'#030308',gridColor:'rgba(180,130,255,.04)',particles:'rainbow',headAcc:null},
+  'guld':     {bgA:'#0f0900',bgB:'#080500',gridColor:'rgba(255,190,0,.04)',  particles:null,   headAcc:null},
+  'kunglig':  {bgA:'#03050f',bgB:'#02030a',gridColor:'rgba(60,100,255,.05)', particles:'stars', headAcc:'crown'},
+  'is':       {bgA:'#04090f',bgB:'#020609',gridColor:'rgba(140,220,255,.04)',particles:'snow',  headAcc:null},
+  'eld':      {bgA:'#0f0400',bgB:'#0a0200',gridColor:'rgba(255,90,0,.04)',   particles:'sparks',headAcc:null},
+  'midnatt':  {bgA:'#010007',bgB:'#010005',gridColor:'rgba(130,40,255,.04)', particles:'stars', headAcc:null},
+  'diamant':  {bgA:'#02070f',bgB:'#01040a',gridColor:'rgba(80,180,255,.05)', particles:'stars', headAcc:null},
+  'smaragd':  {bgA:'#010f04',bgB:'#010a03',gridColor:'rgba(0,190,70,.05)',   particles:null,   headAcc:'glasses'},
+};
+const SEASONAL_THEMES={
+  halloween:{bgA:'#0f0400',bgB:'#050100',gridColor:'rgba(255,110,0,.05)',particles:'bats',  headAcc:'pumpkin',label:'🎃'},
+  xmas:     {bgA:'#020f02',bgB:'#010802',gridColor:'rgba(200,0,30,.04)',  particles:'snow',  headAcc:'santa',  label:'🎄'},
+  easter:   {bgA:'#090f03',bgB:'#060a02',gridColor:'rgba(160,255,80,.04)',particles:'eggs',  headAcc:'bunny',  label:'🐣'},
+  valentines:{bgA:'#0f0205',bgB:'#0a0203',gridColor:'rgba(255,70,110,.05)',particles:'hearts',headAcc:null,   label:'💝'},
+};
+function getEasterDate(year){
+  const a=year%19,b=Math.floor(year/100),c=year%100,d=Math.floor(b/4),e=b%4;
+  const f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30;
+  const i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451);
+  return{month:Math.floor((h+l-7*m+114)/31),day:((h+l-7*m+114)%31)+1};
+}
+function getSeasonalTheme(){
+  const now=new Date(),m=now.getMonth()+1,d=now.getDate(),y=now.getFullYear();
+  if((m===10&&d>=24)||(m===11&&d<=2))return 'halloween';
+  if(m===12&&d>=1)return 'xmas';
+  if(m===2&&d===14)return 'valentines';
+  const e=getEasterDate(y);
+  const eStart=new Date(y,e.month-1,e.day-3),eEnd=new Date(y,e.month-1,e.day+1);
+  if(now>=eStart&&now<=eEnd)return 'easter';
+  return null;
+}
+function getActiveTheme(){
+  const s=getSeasonalTheme();
+  if(s)return{...SEASONAL_THEMES[s],isSeasonal:true,seasonKey:s};
+  return SKIN_THEMES[loadActiveSkin()]||SKIN_THEMES['klassisk'];
+}
+function loadHeadAccessory(){
+  const v=localStorage.getItem(ACTIVE_HEAD_KEY);
+  return v===null?true:v==='true';
+}
+function saveHeadAccessory(v){localStorage.setItem(ACTIVE_HEAD_KEY,String(v));}
+function toggleHeadAccessory(){
+  const cur=loadHeadAccessory();saveHeadAccessory(!cur);renderSkinsPage();
+}
+
+
+/* ═══════════════════════════════════════
+   INSTÄLLNINGAR
+   ═══════════════════════════════════════ */
+let activeOps=new Set(['+','-']),numRange=20,tables=new Set([2,5,10]);
+let speedMode='none',wallWrap=false;
+
+/* ═══════════════════════════════════════
+   SPELVARIABLER
+   ═══════════════════════════════════════ */
+const canvas=document.getElementById('c'),ctx=canvas.getContext('2d');
+function initCanvas(){
+  const avH=Math.max(200,window.innerHeight-258);
+  const avW=window.innerWidth-4;
+  CELL=Math.max(18,Math.min(Math.floor(avH/ROWS),Math.floor(avW/COLS),28));
+  canvas.width=COLS*CELL;canvas.height=ROWS*CELL;
+}
+initCanvas();
+let snake=[],dir={x:1,y:0},nextDir={x:1,y:0};
+let tiles=[],problem=null;
+let score=0,lives=3,combo=0,growPending=0,correctStreak=0;
+let state='menu',lastTickTime=0,moveProgress=0;
+let musicOn=true,audioUnlocked=false,isFastMusic=false;
+let goldPhase=false,goldTimeout=null;
+let personalBestAtStart=0,recordSoundPlayed=false;
+let eatAnim=null; // {x,y,value,startTime}
+
+// Session-statistik
+let sessionCorrect=0,sessionTotal=0;
+// Per-räknesätt session-statistik: {op: {correct, total}}
+let sessionOpStats={};
+
+// Fel-pool: problem som eleven svarat fel på, visas mer frekvent
+const MAX_WRONG_POOL=6;
+let wrongPool=[];
+
+/* ═══════════════════════════════════════
+   SPELARPROFIL
+   ═══════════════════════════════════════ */
+const loadPlayer=()=>localStorage.getItem(PLAYER_KEY)||'';
+const savePlayer=n=>localStorage.setItem(PLAYER_KEY,n);
+const getPlayer=()=>loadPlayer()||'Spelare';
+function updatePlayerBar(){
+  const n=loadPlayer();
+  document.getElementById('playerGreeting').textContent=n?t('greeting',{name:n}):'';
+  document.getElementById('playerBar').style.display=n?'flex':'none';
+}
+
+/* ═══════════════════════════════════════
+   STATISTIK (persistent: bestCombo, bestLength, bestStreak)
+   ═══════════════════════════════════════ */
+function loadStats(){
+  try{return JSON.parse(localStorage.getItem(STATS_KEY))||{bestCombo:0,bestLength:0,bestStreak:0};}
+  catch(e){return{bestCombo:0,bestLength:0,bestStreak:0};}
+}
+function saveStats(s){localStorage.setItem(STATS_KEY,JSON.stringify(s));}
+function updateStats(){
+  const s=loadStats();
+  let changed=false;
+  if(combo>s.bestCombo){s.bestCombo=combo;changed=true;}
+  if(snake.length>s.bestLength){s.bestLength=snake.length;changed=true;}
+  if(correctStreak>s.bestStreak){s.bestStreak=correctStreak;changed=true;}
+  if(changed)saveStats(s);
+}
+
+/* ═══════════════════════════════════════
+   MEDALJER
+   ═══════════════════════════════════════ */
+function loadMedals(){try{return new Set(JSON.parse(localStorage.getItem(MEDALS_KEY))||[]);}catch(e){return new Set();}}
+function saveMedals(s){localStorage.setItem(MEDALS_KEY,JSON.stringify([...s]));}
+function loadOpScores(){try{return JSON.parse(localStorage.getItem(OP_SCORES_KEY))||{'+':0,'-':0,'*':0,'/':0};}catch(e){return{'+':0,'-':0,'*':0,'/':0};}}
+function saveOpScores(s){localStorage.setItem(OP_SCORES_KEY,JSON.stringify(s));}
+
+
+/* ═══════════════════════════════════════
+   ORMSKINN - FUNKTIONER
+   ═══════════════════════════════════════ */
+function loadUnlockedSkins(){try{return new Set(JSON.parse(localStorage.getItem(SKINS_KEY))||[]);}catch(e){return new Set();}}
+function saveUnlockedSkins(s){localStorage.setItem(SKINS_KEY,JSON.stringify([...s]));}
+function loadActiveSkin(){return localStorage.getItem(ACTIVE_SKIN_KEY)||'klassisk';}
+function saveActiveSkin(id){localStorage.setItem(ACTIVE_SKIN_KEY,id);}
+function isSkinUnlocked(id){
+  const def=SKINS_DEF.find(s=>s.id===id);
+  if(!def)return false;
+  if(def.free)return true;
+  return loadUnlockedSkins().has(id);
+}
+function getActiveSkinDef(){
+  const id=loadActiveSkin();
+  return SKINS_DEF.find(s=>s.id===id)||SKINS_DEF[0];
+}
+function unlockSkin(id){
+  const skins=loadUnlockedSkins();if(skins.has(id))return;
+  skins.add(id);saveUnlockedSkins(skins);
+  const def=SKINS_DEF.find(s=>s.id===id);if(def)showSkinToast(def);
+  updateSkinNavBtn();
+}
+function checkSkinUnlocks(medalId){
+  SKINS_DEF.forEach(skin=>{if(skin.unlockMedal===medalId)unlockSkin(skin.id);});
+}
+// Synka skinn från redan upplåsta medaljer (fix för uppgradering från äldre version)
+function syncSkinsFromMedals(){
+  const earned=loadMedals();
+  earned.forEach(medalId=>checkSkinUnlocks(medalId));
+}
+function showSkinToast(def){
+  const c=document.getElementById('medalToast');
+  const el=document.createElement('div');el.className='medal-toast-item';
+  el.style.borderColor='rgba(255,215,0,.55)';
+  const name=getLang()==='en'&&def.nameEn?def.nameEn:def.name;
+  el.innerHTML=`<div class="mt-emoji">${def.emoji}</div>
+    <div class="mt-text"><div class="mt-label">🎨 ${t('skinUnlockedToast')}</div>
+    <div class="mt-name">${name}</div></div>`;
+  c.appendChild(el);setTimeout(()=>el.remove(),3200);
+}
+function updateSkinNavBtn(){
+  const unlocked=SKINS_DEF.filter(s=>isSkinUnlocked(s.id)).length;
+  const total=SKINS_DEF.length;
+  if(document.getElementById('skinsBtnCount'))
+    document.getElementById('skinsBtnCount').textContent=t('skinsCount',{n:unlocked,tot:total});
+}
+function renderSkinsPage(){
+  const activeSkin=loadActiveSkin();
+  const el=document.getElementById('skinsPageContent');el.innerHTML='';
+  const unlocked=SKINS_DEF.filter(s=>isSkinUnlocked(s.id)).length;
+  document.getElementById('skinsPageCount').textContent=t('skinsCount',{n:unlocked,tot:SKINS_DEF.length});
+  document.getElementById('skinsTitleEl').textContent=t('skinsTitle');
+  // Head accessory toggle
+  const headOn=loadHeadAccessory();
+  const toggleDiv=document.createElement('div');
+  toggleDiv.style.cssText='width:100%;margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;';
+  const toggleBtn=document.createElement('button');
+  toggleBtn.className='export-btn';
+  toggleBtn.style.cssText='border-color:'+(headOn?'var(--accent)':'var(--line)')+';color:'+(headOn?'var(--accent)':'var(--muted)')+';';
+  toggleBtn.textContent=t(headOn?'headAccOn':'headAccOff');
+  toggleBtn.addEventListener('click',toggleHeadAccessory);
+  toggleDiv.appendChild(toggleBtn);
+  // Seasonal indicator
+  const season=getSeasonalTheme();
+  if(season){
+    const st=SEASONAL_THEMES[season];
+    const seasonSpan=document.createElement('span');
+    seasonSpan.style.cssText='font-size:11px;color:var(--accent);font-weight:700;';
+    seasonSpan.textContent=t('seasonalActive')+' '+st.label;
+    toggleDiv.appendChild(seasonSpan);
+  }
+  el.appendChild(toggleDiv);
+  SKINS_DEF.forEach(skin=>{
+    const isUnlocked=isSkinUnlocked(skin.id);
+    const isActive=skin.id===activeSkin;
+    const name=getLang()==='en'&&skin.nameEn?skin.nameEn:skin.name;
+    let unlockText=skin.free?t('skinFree'):(getLang()==='en'&&skin.descEn?skin.descEn:skin.descSv)||'';
+    const card=document.createElement('div');
+    card.className='skin-card'+(isActive?' active':'')+(isUnlocked?'':' locked');
+    card.innerHTML=`
+      <div class="skin-preview" style="background:${skin.previewCss}"></div>
+      <div class="skin-info">
+        <div class="skin-name">${skin.emoji} ${name}</div>
+        <div class="skin-unlock">${unlockText}</div>
+      </div>
+      ${isActive?`<span class="skin-badge">${t('skinActive')}</span>`:''}
+      ${!isUnlocked?'<span class="skin-lock-badge">🔒</span>':''}
+    `;
+    if(isUnlocked){
+      card.addEventListener('click',()=>{
+        saveActiveSkin(skin.id);
+        renderSkinsPage();
+      });
+    }
+    el.appendChild(card);
+  });
+}
+function goToSkins(){renderSkinsPage();showScreen('skinsScreen');}
+
+function unlockMedal(id){
+  const earned=loadMedals();if(earned.has(id))return;
+  earned.add(id);saveMedals(earned);
+  const def=MEDALS_DEF.find(m=>m.id===id);if(def)showMedalToast(def);
+  updateMedalNavBtn();
+  checkSkinUnlocks(id);
+}
+function showMedalToast(def){
+  const c=document.getElementById('medalToast');
+  const el=document.createElement('div');el.className='medal-toast-item';
+  el.innerHTML=`<div class="mt-emoji">${def.emoji}</div>
+    <div class="mt-text"><div class="mt-label">🏅 Medalj upplåst!</div>
+    <div class="mt-name">${def.name}</div><div class="mt-desc">${def.desc}</div></div>`;
+  c.appendChild(el);setTimeout(()=>el.remove(),3200);
+}
+function checkMedals(){
+  if(score>=500)   unlockMedal('p500');
+  if(score>=2000)  unlockMedal('p2000');
+  if(score>=5000)  unlockMedal('p5000');
+  if(score>=10000) unlockMedal('p10000');
+  if(snake.length>=15) unlockMedal('len15');
+  if(snake.length>=25) unlockMedal('len25');
+  if(snake.length>=35) unlockMedal('len35');
+  if(snake.length>=50) unlockMedal('len50');
+  if(score>=1000&&activeOps.size===4&&numRange===1000) unlockMedal('genius');
+}
+function checkOpMedals(){
+  const os=loadOpScores();
+  if(os['+']>=1000) unlockMedal('add1000');
+  if(os['-']>=1000) unlockMedal('sub1000');
+  if(os['*']>=500)  unlockMedal('mul500');
+  if(os['/']>=500)  unlockMedal('div500');
+}
+function updateMedalNavBtn(){
+  const earned=loadMedals();
+  document.getElementById('medalsBtnCount').textContent=t('medalsCount',{n:earned.size,tot:MEDALS_DEF.length});
+}
+
+/* Progress mot varje medalj */
+function getMedalProgress(id){
+  const os=loadOpScores(),stats=loadStats();
+  const bestScore=loadHS().reduce((m,h)=>Math.max(m,h.score),0);
+  const map={
+    p500:{cur:bestScore,max:500},p2000:{cur:bestScore,max:2000},
+    p5000:{cur:bestScore,max:5000},p10000:{cur:bestScore,max:10000},
+    add1000:{cur:os['+']||0,max:1000},sub1000:{cur:os['-']||0,max:1000},
+    mul500:{cur:os['*']||0,max:500},div500:{cur:os['/']||0,max:500},
+    c5:{cur:stats.bestCombo,max:5},c10:{cur:stats.bestCombo,max:10},
+    c15:{cur:stats.bestCombo,max:15},c20:{cur:stats.bestCombo,max:20},
+    c25:{cur:stats.bestCombo,max:25},c30:{cur:stats.bestCombo,max:30},
+    c50:{cur:stats.bestCombo,max:50},c75:{cur:stats.bestCombo,max:75},
+    c100:{cur:stats.bestCombo,max:100},
+    len15:{cur:stats.bestLength,max:15},len25:{cur:stats.bestLength,max:25},len35:{cur:stats.bestLength,max:35},len50:{cur:stats.bestLength,max:50},
+    osviklig:{cur:stats.bestStreak,max:10},
+    genius:null,
+  };
+  return map[id]||null;
+}
+
+function renderMedalsPage(){
+  const earned=loadMedals();
+  document.getElementById('mpCount').textContent=`${earned.size} / ${MEDALS_DEF.length} upplåsta`;
+  const cats={};
+  MEDALS_DEF.forEach(m=>{if(!cats[m.cat])cats[m.cat]=[];cats[m.cat].push(m);});
+  const el=document.getElementById('medalsPageContent');el.innerHTML='';
+  Object.entries(cats).forEach(([cat,medals])=>{
+    const sec=document.createElement('div');sec.className='medals-cat';
+    const t=document.createElement('div');t.className='medals-cat-title';t.textContent=cat;sec.appendChild(t);
+    const g=document.createElement('div');g.className='medals-grid';
+    medals.forEach(m=>{
+      const isUnlocked=earned.has(m.id);
+      const b=document.createElement('div');
+      b.className='medal-badge '+(isUnlocked?'unlocked':'locked');
+      const prog=(!isUnlocked)?getMedalProgress(m.id):null;
+      const pct=prog?Math.min(100,Math.round((prog.cur/prog.max)*100)):0;
+      b.innerHTML=`<span class="m-emoji">${m.emoji}</span>
+        <span class="m-info">
+          <span class="m-name">${getLang()==='en'&&m.nameEn?m.nameEn:m.name}</span>
+          <span class="m-desc">${getLang()==='en'&&m.descEn?m.descEn:m.desc}</span>
+          ${(!isUnlocked&&prog)?`
+            <div class="medal-prog"><div class="medal-prog-bar" style="width:${pct}%"></div></div>
+            <span class="medal-prog-text">${Math.min(prog.cur,prog.max).toLocaleString('sv')} / ${prog.max.toLocaleString('sv')}</span>
+          `:''}
+        </span>`;
+      g.appendChild(b);
+    });
+    sec.appendChild(g);el.appendChild(sec);
+  });
+}
+
+/* ═══════════════════════════════════════
+   EXPORT / IMPORT
+   ═══════════════════════════════════════ */
+async function exportData(){
+  const exportedAt=new Date().toISOString().slice(0,10);
+  const data={player:loadPlayer(),medals:[...loadMedals()],opScores:loadOpScores(),
+    stats:loadStats(),highscores:loadHS(),
+    unlockedSkins:[...loadUnlockedSkins()],activeSkin:loadActiveSkin(),
+    exportedAt,version:4};
+  const json=JSON.stringify(data,null,2);
+  const blob=new Blob([json],{type:'application/json'});
+  const fname=`matteormen_${(loadPlayer()||'spelare').replace(/\s+/g,'_')}_${exportedAt}.json`;
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');
+  a.href=url;a.download=fname;a.click();URL.revokeObjectURL(url);
+}
+function importData(file){
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const d=JSON.parse(e.target.result);
+      if(d.player)savePlayer(d.player);
+      if(Array.isArray(d.medals))saveMedals(new Set(d.medals));
+      if(d.opScores)saveOpScores(d.opScores);
+      if(d.stats)saveStats(d.stats);
+      if(Array.isArray(d.highscores))localStorage.setItem(HS_KEY,JSON.stringify(d.highscores.slice(0,10)));
+      if(Array.isArray(d.unlockedSkins))saveUnlockedSkins(new Set(d.unlockedSkins));
+      if(d.activeSkin)saveActiveSkin(d.activeSkin);
+      updatePlayerBar();updateMedalNavBtn();renderHS();updateSkinNavBtn();
+      alert('✅ Sparfil laddad! Välkommen tillbaka, '+loadPlayer()+'!');
+    }catch(err){alert('❌ Kunde inte läsa filen. Är det en giltig sparfil?');}
+  };reader.readAsText(file);
+}
+
+/* ═══════════════════════════════════════
+   AUDIO
+   ═══════════════════════════════════════ */
+const bgMusic=document.getElementById('bgMusic'),fastMusic=document.getElementById('fastMusic');
+const titelMusic=document.getElementById('titelMusic');
+let audioCtx=null;
+function getAC(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function beep(freq,type,dur,vol=0.27){
+  try{const ac=getAC(),o=ac.createOscillator(),g=ac.createGain();
+  o.type=type;o.frequency.value=freq;g.gain.setValueAtTime(vol,ac.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+dur);
+  o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+dur);}catch(e){}
+}
+// Räknesätts-toner
+const OP_FREQS={'+':660,'-':520,'*':740,'/':880};
+function sfxOk(op){
+  const f=OP_FREQS[op]||660;
+  beep(f,'sine',.11);setTimeout(()=>beep(f*(4/3),'sine',.11),65);
+}
+function sfxCombo(n){
+  if(n===5) {beep(660,'sine',.08);setTimeout(()=>beep(880,'sine',.08),80);setTimeout(()=>beep(1100,'sine',.14),160);}
+  else if(n===10){[660,880,1100,1320].forEach((f,i)=>setTimeout(()=>beep(f,'sine',.1),i*70));}
+  else if(n===20){[660,770,880,990,1100,1320].forEach((f,i)=>setTimeout(()=>beep(f,'triangle',.11),i*55));}
+  else if(n===50){[440,550,660,880,1100,1320,1760].forEach((f,i)=>setTimeout(()=>beep(f,'sine',.13),i*50));}
+  else if(n>=100){for(let i=0;i<8;i++)setTimeout(()=>{beep(880+Math.random()*440,'sine',.08);},i*40);}
+}
+function sfxGold(){beep(1400,'sine',.06,.18);setTimeout(()=>beep(1800,'sine',.08,.12),70);}
+function sfxRecord(){
+  [330,440,550,660,880].forEach((f,i)=>setTimeout(()=>beep(f,'sine',.13),i*55));
+  setTimeout(()=>{beep(880,'triangle',.25,.18);},300);
+}
+function sfxBad(){beep(180,'sawtooth',.2,.2);}
+function sfxDie(){beep(220,'sawtooth',.38,.22);setTimeout(()=>beep(140,'sawtooth',.48,.17),190);}
+function shouldFast(){if(speedMode==='score')return score>=500;if(speedMode==='length')return snake.length>=15;return false;}
+function tryTitelMusic(){
+  if(!musicOn)return;
+  titelMusic.play().then(()=>{audioUnlocked=true;}).catch(()=>{});
+}
+function stopTitelMusic(resetTime){
+  titelMusic.pause();if(resetTime)titelMusic.currentTime=0;
+}
+function tryMusic(){
+  if(!musicOn)return;
+  stopTitelMusic(false);
+  if(shouldFast()){bgMusic.pause();fastMusic.play().then(()=>{audioUnlocked=true;isFastMusic=true;}).catch(()=>{});}
+  else{fastMusic.pause();bgMusic.play().then(()=>{audioUnlocked=true;isFastMusic=false;}).catch(()=>{});}
+}
+function updateMusicMode(){
+  if(!musicOn||!audioUnlocked)return;
+  const fast=shouldFast();
+  if(fast&&!isFastMusic){bgMusic.pause();fastMusic.play().catch(()=>{});isFastMusic=true;}
+  else if(!fast&&isFastMusic){fastMusic.pause();bgMusic.play().catch(()=>{});isFastMusic=false;}
+}
+function updateMenuMusicBtn(){
+  $('btnMenuMusic').textContent=musicOn?'🔊 Musik':'🔇 Musik';
+}
+function toggleMusic(){
+  musicOn=!musicOn;
+  updateMenuMusicBtn();
+  if(musicOn){
+    if(state==='menu')tryTitelMusic();
+    else tryMusic();
+  }else{
+    titelMusic.pause();bgMusic.pause();fastMusic.pause();isFastMusic=false;
+  }
+}
+
+/* ═══════════════════════════════════════
+   UTILS
+   ═══════════════════════════════════════ */
+const $=id=>document.getElementById(id);
+const R=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const lerp=(a,b,t)=>a+(b-a)*t;
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+/* ═══════════════════════════════════════
+   HASTIGHET
+   ═══════════════════════════════════════ */
+function getSpeed(){
+  let base=290;
+  if(numRange>=1000)base=175;else if(numRange>=100)base=210;else if(numRange>=20)base=255;
+  const maxT=tables.size>0?Math.max(...tables):2;
+  if(maxT>=12)base-=25;else if(maxT>=9)base-=15;
+  if(speedMode==='score')  return Math.max(120,base-Math.floor(score/50)*8);
+  if(speedMode==='length') return Math.max(120,base-(Math.max(0,snake.length-4))*4);
+  return Math.max(140,base);
+}
+
+/* ═══════════════════════════════════════
+   PROBLEM — med fel-pool
+   ═══════════════════════════════════════ */
+function genProblem(){
+  // 35% chans att välja ett tidigare felsvarats problem
+  if(wrongPool.length>0 && Math.random()<0.35){
+    const p={...wrongPool[Math.floor(Math.random()*wrongPool.length)]};
+    return p;
+  }
+  return genFreshProblem();
+}
+function genFreshProblem(){
+  const ops=[...activeOps];if(!ops.length)return{expr:'2 + 2',answer:4,op:'+'};
+  const op=ops[Math.floor(Math.random()*ops.length)];
+  for(let att=0;att<120;att++){
+    if(op==='+'){
+      const max=numRange,a=R(1,Math.floor(max*.9)),b=R(1,Math.min(Math.floor(max*.9),max-a));
+      if(b<1)continue;const ans=a+b;if(ans>max)continue;return{expr:`${a} + ${b}`,answer:ans,op:'+'};
+    }
+    if(op==='-'){
+      const max=numRange,a=R(Math.max(2,Math.floor(max*.1)),max),b=R(1,a);
+      const ans=a-b;if(ans<0)continue;return{expr:`${a} − ${b}`,answer:ans,op:'-'};
+    }
+    if(op==='*'){
+      if(!tables.size)continue;
+      const tArr=[...tables],t=tArr[Math.floor(Math.random()*tArr.length)];
+      const o=R(1,Math.min(12,Math.max(...tArr)));let a=t,b=o;if(Math.random()>.5)[a,b]=[b,a];
+      return{expr:`${a} × ${b}`,answer:a*b,op:'*'};
+    }
+    if(op==='/'){
+      if(!tables.size)continue;
+      const tArr=[...tables],d=tArr[Math.floor(Math.random()*tArr.length)];
+      if(!d)continue;const q=R(1,Math.min(12,Math.max(...tArr)));
+      return{expr:`${q*d} ÷ ${d}`,answer:q,op:'/'};
+    }
+  }
+  return{expr:'2 + 3',answer:5,op:'+'};
+}
+function genWrongs(correct){
+  const spread=numRange>=1000?60:numRange>=100?15:numRange>=20?6:3;
+  const s=new Set();let att=0;
+  while(s.size<3&&att++<600){const off=R(-spread,spread);if(!off)continue;
+    const w=correct+off;if(w<0||w===correct||s.has(w))continue;s.add(w);}
+  for(let f=correct+1;s.size<3;f++)if(f!==correct&&f>=0)s.add(f);
+  return[...s].slice(0,3);
+}
+function addToWrongPool(prob){
+  if(wrongPool.some(p=>p.expr===prob.expr))return;
+  if(wrongPool.length>=MAX_WRONG_POOL)wrongPool.shift();
+  wrongPool.push({...prob});
+}
+function removeFromWrongPool(expr){
+  const i=wrongPool.findIndex(p=>p.expr===expr);
+  if(i!==-1)wrongPool.splice(i,1);
+}
+
+/* ═══════════════════════════════════════
+   BRICKOR
+   ═══════════════════════════════════════ */
+function placeTiles(){
+  tiles=[];
+  const occ=new Set(snake.map(s=>`${s.x},${s.y}`));
+  const head=snake[0];
+  const MIN_DIST=3;      // generellt minsta avstånd
+  const CONE_LEN=7;      // antal steg framåt som är förbjudna
+  function isTooClose(p){
+    const dist=Math.abs(p.x-head.x)+Math.abs(p.y-head.y);
+    if(dist<MIN_DIST)return true;
+    // Riktningszon — exkludera steg rakt framåt
+    for(let s=1;s<=CONE_LEN;s++){
+      const fx=((head.x+dir.x*s)%COLS+COLS)%COLS;
+      const fy=((head.y+dir.y*s)%ROWS+ROWS)%ROWS;
+      if(p.x===fx&&p.y===fy)return true;
+    }
+    return false;
+  }
+  shuffle([problem.answer,...genWrongs(problem.answer)]).forEach(val=>{
+    let p,att=0,ok=false;
+    while(!ok&&att<300){
+      p={x:R(0,COLS-1),y:R(0,ROWS-1)};att++;
+      ok=!isTooClose(p)&&!occ.has(`${p.x},${p.y}`)&&!tiles.some(t=>t.x===p.x&&t.y===p.y);
+    }
+    tiles.push({x:p.x,y:p.y,value:val,correct:val===problem.answer,isGold:false});
+  });
+}
+
+/* ═══════════════════════════════════════
+   SPEL: START & LOOP
+   ═══════════════════════════════════════ */
+function startGame(){
+  initCanvas();
+  if(!activeOps.size){alert('Välj minst ett räknesätt!');return;}
+  if((activeOps.has('*')||activeOps.has('/'))&&!tables.size){alert('Välj minst en multiplikationstabell!');return;}
+  if(goldTimeout){clearTimeout(goldTimeout);goldTimeout=null;}
+  goldPhase=false;isFastMusic=false;
+  wrongPool=[];
+  sessionCorrect=0;sessionTotal=0;sessionOpStats={};
+  const mx=Math.floor(COLS/2),my=Math.floor(ROWS/2);
+  snake=[];for(let i=0;i<4;i++)snake.push({x:mx-i,y:my,px:mx-i,py:my});
+  dir={x:1,y:0};nextDir={x:1,y:0};
+  score=0;lives=practiceMode?0:3;combo=0;growPending=0;correctStreak=0;
+  personalBestAtStart=loadHS().reduce((m,h)=>Math.max(m,h.score),0);
+  recordSoundPlayed=false;
+  problem=genProblem();placeTiles();updateHUD();
+  $('hsNameInp').value=loadPlayer();
+  state='playing';showScreen('gameScreen');hideOverlays();
+  showTouchControls(true);
+  stopTitelMusic(false);
+  lastTickTime=performance.now();tryMusic();requestAnimationFrame(gameLoop);
+}
+/* ═══════════════════════════════════════
+   GAMEPAD
+   ═══════════════════════════════════════ */
+let _gpLastDir=null;
+function pollGamepad(){
+  const gps=navigator.getGamepads?navigator.getGamepads():[];
+  for(let i=0;i<gps.length;i++){
+    const gp=gps[i];if(!gp)continue;
+    const DEAD=0.4;
+    // Vänster analog + d-pad (axlarna 0/1, d-pad axlar 6/7 eller knappar 12-15)
+    const ax=gp.axes[0]||0, ay=gp.axes[1]||0;
+    let nd=null;
+    if(Math.abs(ax)>Math.abs(ay)){
+      if(ax< -DEAD)nd={x:-1,y:0};
+      else if(ax>DEAD)nd={x:1,y:0};
+    }else{
+      if(ay< -DEAD)nd={x:0,y:-1};
+      else if(ay>DEAD)nd={x:0,y:1};
+    }
+    // D-pad knappar (standard layout: 12=upp,13=ner,14=vänster,15=höger)
+    if(!nd){
+      if(gp.buttons[12]?.pressed)nd={x:0,y:-1};
+      else if(gp.buttons[13]?.pressed)nd={x:0,y:1};
+      else if(gp.buttons[14]?.pressed)nd={x:-1,y:0};
+      else if(gp.buttons[15]?.pressed)nd={x:1,y:0};
+    }
+    // Trigga bara om riktningen ändrats (undviker spam)
+    if(nd){
+      const key=`${nd.x},${nd.y}`;
+      if(key!==_gpLastDir){_gpLastDir=key;applyDir(nd);}
+    }else{_gpLastDir=null;}
+    // Start-knapp (9) = paus, Select (8) = meny
+    if(gp.buttons[9]?.pressed&&state==='playing')pauseGame();
+    break; // använd bara första anslutna gamepad
+  }
+}
+
+function gameLoop(ts){
+  if(state!=='playing')return;
+  pollGamepad();
+  const spd=getSpeed(),elapsed=ts-lastTickTime;
+  moveProgress=Math.min(1,elapsed/spd);
+  if(elapsed>=spd){lastTickTime=ts;moveProgress=0;tick();if(state!=='playing')return;}
+  draw(moveProgress);requestAnimationFrame(gameLoop);
+}
+
+/* ═══════════════════════════════════════
+   TICK
+   ═══════════════════════════════════════ */
+function applyDir(nd){if(nd&&!(nd.x===-dir.x&&nd.y===-dir.y))nextDir=nd;}
+
+function tick(){
+  dir={...nextDir};
+  const old=snake.map(s=>({x:s.x,y:s.y}));
+  let hx=snake[0].x+dir.x, hy=snake[0].y+dir.y;
+
+  if(wallWrap){
+    hx=((hx%COLS)+COLS)%COLS;
+    hy=((hy%ROWS)+ROWS)%ROWS;
+  }else{
+    if(hx<0||hx>=COLS||hy<0||hy>=ROWS){triggerGameOver();return;}
+  }
+  for(let i=0;i<snake.length-1;i++){if(snake[i].x===hx&&snake[i].y===hy){triggerGameOver();return;}}
+
+  snake.unshift({x:hx,y:hy,px:old[0].x,py:old[0].y});
+  if(growPending>0)growPending--;else snake.pop();
+  for(let i=1;i<snake.length;i++){snake[i].px=old[i]?old[i].x:snake[i].x;snake[i].py=old[i]?old[i].y:snake[i].y;}
+
+  if(goldPhase){
+    const gt=tiles.find(t=>t.isGold);
+    if(gt&&gt.x===hx&&gt.y===hy){clearTimeout(goldTimeout);goldTimeout=null;goldPhase=false;problem=genProblem();placeTiles();}
+    updateHUD();updateMusicMode();return;
+  }
+
+  const ti=tiles.findIndex(t=>t.x===hx&&t.y===hy);
+  if(ti!==-1){
+    const tile=tiles.splice(ti,1)[0];
+    sessionTotal++;
+    if(!sessionOpStats[problem.op])sessionOpStats[problem.op]={correct:0,total:0};
+    sessionOpStats[problem.op].total++;
+
+    if(tile.correct){
+      combo++;correctStreak++;sessionCorrect++;
+      sessionOpStats[problem.op].correct++;
+      const base=10+(getSpeed()/10|0),bonus=combo>1?Math.floor(base*(combo-1)*.4):0;
+      const pts=base+bonus;score+=pts;growPending+=2;sfxOk(problem.op);flashFx('good');
+      eatAnim={x:tile.x,y:tile.y,value:tile.value,startTime:performance.now()};
+
+      // Cumulative op-scores
+      const os=loadOpScores();os[problem.op]=(os[problem.op]||0)+pts;saveOpScores(os);
+      checkOpMedals();
+
+      // Ta bort från fel-pool om den var där
+      removeFromWrongPool(problem.expr);
+
+      // Combo-medaljer
+      [[5,'c5'],[10,'c10'],[15,'c15'],[20,'c20'],[25,'c25'],[30,'c30'],[50,'c50'],[75,'c75'],[100,'c100']]
+        .forEach(([n,id])=>{if(combo===n){unlockMedal(id);sfxCombo(n);}});
+      if(!recordSoundPlayed&&score>personalBestAtStart&&personalBestAtStart>0){recordSoundPlayed=true;sfxRecord();}
+      if(correctStreak>=10)unlockMedal('osviklig');
+      updateStats();checkMedals();
+      problem=genProblem();placeTiles();
+    }else{
+      combo=0;correctStreak=0;
+      addToWrongPool(problem);
+      sfxBad();flashFx('bad');
+      if(practiceMode){
+        score=Math.max(0,score-Math.floor(5+getSpeed()/20));
+        if(snake.length>1)snake.pop();
+        if(snake.length<=1){triggerGameOver();return;}
+      }else{
+        for(let i=0;i<2;i++)if(snake.length>2)snake.pop();
+        lives--;
+        if(lives<=0||snake.length<2){triggerGameOver();return;}
+      }
+      const ct=tiles.find(t=>t.correct);
+      if(ct){
+        ct.isGold=true;goldPhase=true;sfxGold();
+        if(goldTimeout)clearTimeout(goldTimeout);
+        goldTimeout=setTimeout(()=>{goldPhase=false;goldTimeout=null;tiles.forEach(t=>t.isGold=false);
+          if(state==='playing'||state==='paused'){problem=genProblem();placeTiles();}},1500);
+      }else{problem=genProblem();placeTiles();}
+    }
+  }
+  updateMusicMode();updateHUD();
+}
+
+/* ═══════════════════════════════════════
+   RITNING
+   ═══════════════════════════════════════ */
+/* ═══════════════════════════════════════
+   BAKGRUNDSTEMA & PARTIKLAR
+   ═══════════════════════════════════════ */
+function drawParticles(type){
+  const T=performance.now(),W=canvas.width,H=canvas.height;
+  const N=type==='bats'?8:type==='hearts'?12:32;
+  for(let i=0;i<N;i++){
+    const sx=(i*137.508*1.618)%W, sy=(i*137.508*2.414)%H;
+    if(type==='stars'){
+      const a=0.15+0.2*Math.sin(T/900+i*1.3);
+      ctx.fillStyle=`rgba(255,255,255,${a})`;
+      ctx.beginPath();ctx.arc(sx,sy,1+(i%3)*0.5,0,Math.PI*2);ctx.fill();
+    }else if(type==='snow'){
+      const y=(sy+T/55*(0.4+(i%5)*0.25))%H;
+      const a=0.25+0.15*Math.sin(T/700+i);
+      ctx.fillStyle=`rgba(200,230,255,${a})`;
+      ctx.beginPath();ctx.arc(sx+Math.sin(T/1200+i)*6,y,1+(i%3),0,Math.PI*2);ctx.fill();
+    }else if(type==='sparks'){
+      const y=H-(sy+T/45*(0.4+(i%4)*0.35))%H;
+      const a=0.15+0.25*Math.sin(T/450+i*0.9);
+      ctx.fillStyle=`rgba(255,${90+(i%5)*30},0,${a})`;
+      ctx.beginPath();ctx.arc(sx,y,1.5,0,Math.PI*2);ctx.fill();
+    }else if(type==='rainbow'){
+      const hue=(T/25+i*28)%360,a=0.06+0.04*Math.sin(T/800+i);
+      ctx.fillStyle=`hsla(${hue},90%,65%,${a})`;
+      ctx.beginPath();ctx.arc(sx,sy,2+(i%3),0,Math.PI*2);ctx.fill();
+    }else if(type==='bats'){
+      const bx=sx+Math.sin(T/1400+i*0.9)*50,by=(sy+T/75)%H;
+      const a=0.2+0.1*Math.sin(T/600+i);
+      ctx.fillStyle=`rgba(140,40,0,${a})`;
+      ctx.save();ctx.translate(bx,by);ctx.rotate(Math.sin(T/900+i)*0.4);
+      ctx.beginPath();ctx.ellipse(0,0,7,3,0,0,Math.PI*2);ctx.fill();
+      ctx.restore();
+    }else if(type==='hearts'){
+      const hx=sx+Math.sin(T/1800+i)*25,hy=(sy+T/95)%H;
+      const a=0.12+0.08*Math.sin(T/700+i);
+      ctx.fillStyle=`rgba(255,70,110,${a})`;
+      ctx.beginPath();ctx.arc(hx-3,hy,3.5,0,Math.PI*2);
+      ctx.arc(hx+3,hy,3.5,0,Math.PI*2);ctx.fill();
+    }else if(type==='eggs'){
+      const hy2=(sy+T/110)%H;
+      const hue=(i*47+30)%360,a=0.12+0.06*Math.sin(T/900+i);
+      ctx.fillStyle=`hsla(${hue},80%,70%,${a})`;
+      ctx.beginPath();ctx.ellipse(sx,hy2,3,4,0,0,Math.PI*2);ctx.fill();
+    }
+  }
+}
+function drawBackground(theme){
+  ctx.fillStyle=theme.bgA||'#060c08';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.strokeStyle=theme.gridColor||'rgba(0,255,100,.033)';ctx.lineWidth=1;
+  for(let x=0;x<=COLS;x++){ctx.beginPath();ctx.moveTo(x*CELL,0);ctx.lineTo(x*CELL,canvas.height);ctx.stroke();}
+  for(let y=0;y<=ROWS;y++){ctx.beginPath();ctx.moveTo(0,y*CELL);ctx.lineTo(canvas.width,y*CELL);ctx.stroke();}
+  if(theme.particles)drawParticles(theme.particles);
+}
+
+function draw(t){
+  const _theme=getActiveTheme();
+  drawBackground(_theme);
+  tiles.forEach(tile=>drawTile(tile));
+  // Tugga-animation: rätt svar krymper mot huvudet
+  if(eatAnim){
+    const prog=Math.min(1,(performance.now()-eatAnim.startTime)/260);
+    if(prog>=1){eatAnim=null;}
+    else{
+      const hx=lerp(snake[0].px,snake[0].x,t);
+      const hy=lerp(snake[0].py,snake[0].y,t);
+      const ex=lerp(eatAnim.x,hx,prog);
+      const ey=lerp(eatAnim.y,hy,prog);
+      const sc=1-prog*0.92;
+      ctx.save();
+      ctx.translate(ex*CELL+CELL/2,ey*CELL+CELL/2);
+      ctx.scale(sc,sc);
+      ctx.translate(-CELL/2,-CELL/2);
+      const val=String(eatAnim.value),fs=val.length<=2?17:val.length===3?13:11;
+      const fade=1-prog;
+      ctx.shadowColor='rgba(255,215,0,.9)';ctx.shadowBlur=18*fade;
+      ctx.fillStyle=`rgba(255,215,0,${0.35*fade})`;rRect(3,3,CELL-6,CELL-6,12);ctx.fill();
+      ctx.strokeStyle=`rgba(255,215,0,${fade})`;ctx.lineWidth=2.5;rRect(3,3,CELL-6,CELL-6,12);ctx.stroke();
+      ctx.shadowBlur=0;ctx.fillStyle=`rgba(255,229,102,${fade})`;
+      ctx.font=`900 ${fs}px 'Orbitron',monospace`;ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(val,CELL/2,CELL/2);
+      ctx.restore();
+    }
+  }
+  for(let i=snake.length-1;i>=0;i--){
+    const s=snake[i],isHead=i===0;
+    const dx=s.x-s.px,dy=s.y-s.py;
+    if(Math.abs(dx)>1){
+      // Svänger horisontellt
+      const ry=lerp(s.py,s.y,t);
+      if(dx<-1){drawSeg(lerp(s.px,COLS,t),ry,i,isHead);drawSeg(lerp(-1,s.x,t),ry,i,isHead);}
+      else     {drawSeg(lerp(s.px,-1,t),ry,i,isHead);  drawSeg(lerp(COLS,s.x,t),ry,i,isHead);}
+    }else if(Math.abs(dy)>1){
+      // Svänger vertikalt
+      const rx=lerp(s.px,s.x,t);
+      if(dy<-1){drawSeg(rx,lerp(s.py,ROWS,t),i,isHead);drawSeg(rx,lerp(-1,s.y,t),i,isHead);}
+      else     {drawSeg(rx,lerp(s.py,-1,t),i,isHead);  drawSeg(rx,lerp(ROWS,s.y,t),i,isHead);}
+    }else{
+      drawSeg(lerp(s.px,s.x,t),lerp(s.py,s.y,t),i,isHead);
+    }
+  }
+  // Subtil indikator om runda väggar är på
+  if(wallWrap){
+    ctx.strokeStyle='rgba(0,255,136,.14)';ctx.lineWidth=3;ctx.strokeRect(1,1,canvas.width-2,canvas.height-2);
+  }
+}
+function drawTile(t){
+  const px=t.x*CELL+3,py=t.y*CELL+3,s=CELL-6,val=String(t.value),fs=val.length<=2?17:val.length===3?13:11;
+  if(t.isGold){
+    ctx.shadowColor='rgba(255,215,0,.9)';ctx.shadowBlur=22;
+    ctx.fillStyle='rgba(255,215,0,.35)';rRect(px,py,s,s,12);ctx.fill();
+    ctx.strokeStyle='#ffd700';ctx.lineWidth=2.5;rRect(px,py,s,s,12);ctx.stroke();
+    ctx.shadowBlur=0;ctx.fillStyle='#ffe566';
+  }else{
+    ctx.shadowColor='rgba(140,190,255,.6)';ctx.shadowBlur=13;
+    ctx.fillStyle='rgba(80,140,255,.18)';rRect(px,py,s,s,12);ctx.fill();
+    ctx.strokeStyle='rgba(160,210,255,.65)';ctx.lineWidth=1.8;rRect(px,py,s,s,12);ctx.stroke();
+    ctx.shadowBlur=0;ctx.fillStyle='#eaf5ff';
+  }
+  ctx.font=`900 ${fs}px 'Orbitron',monospace`;ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.shadowColor=t.isGold?'rgba(255,200,0,.85)':'rgba(160,220,255,.8)';ctx.shadowBlur=t.isGold?9:5;
+  ctx.fillText(val,t.x*CELL+CELL/2,t.y*CELL+CELL/2);ctx.shadowBlur=0;
+}
+function drawSeg(rx,ry,i,isHead){
+  const skin=getActiveSkinDef();
+  const px=rx*CELL+1,py=ry*CELL+1,s=CELL-2,alpha=isHead?1:Math.max(0.15,1-i*.04);
+  ctx.shadowColor=skin.shadow;ctx.shadowBlur=isHead?20:5;
+  if(isHead){
+    const g=ctx.createLinearGradient(px,py,px+s,py+s);
+    if(skin.rainbow){
+      const hue=(performance.now()/18+i*22)%360;
+      g.addColorStop(0,`hsl(${hue},100%,85%)`);
+      g.addColorStop(1,`hsl(${(hue+80)%360},100%,45%)`);
+    }else{g.addColorStop(0,skin.headA);g.addColorStop(1,skin.headB);}
+    ctx.fillStyle=g;
+  }else{
+    if(skin.rainbow){
+      const hue=(performance.now()/18+i*22)%360;
+      ctx.fillStyle=`hsla(${hue},90%,${35+alpha*20}%,${Math.min(1,alpha+.05)})`;
+    }else{ctx.fillStyle=skin.bodyFn(alpha);}
+  }
+  rRect(px,py,s,s,isHead?13:9);ctx.fill();ctx.shadowBlur=0;
+  if(isHead){
+    const cx=rx*CELL+CELL/2,cy=ry*CELL+CELL/2;ctx.fillStyle='#060c08';
+    let e1x,e1y,e2x,e2y;
+    if(dir.x===1){e1x=cx+6;e1y=cy-5;e2x=cx+6;e2y=cy+5;}
+    else if(dir.x===-1){e1x=cx-6;e1y=cy-5;e2x=cx-6;e2y=cy+5;}
+    else if(dir.y===1){e1x=cx-5;e1y=cy+6;e2x=cx+5;e2y=cy+6;}
+    else{e1x=cx-5;e1y=cy-6;e2x=cx+5;e2y=cy-6;}
+    ctx.beginPath();ctx.arc(e1x,e1y,3,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(e2x,e2y,3,0,Math.PI*2);ctx.fill();
+    // Head accessory
+    const _th=getActiveTheme();
+    const _acc=_th.headAcc||(SKIN_THEMES[loadActiveSkin()]||{}).headAcc;
+    const _showAcc=_th.isSeasonal||loadHeadAccessory();
+    if(_acc&&_showAcc)drawHeadAccessory(_acc,cx,cy);
+  }
+}
+function drawHeadAccessory(acc,cx,cy){
+  ctx.save();
+  if(acc==='crown'){
+    ctx.fillStyle='#ffd700';ctx.shadowColor='#ffcc00';ctx.shadowBlur=7;
+    ctx.beginPath();
+    ctx.moveTo(cx-8,cy-9);ctx.lineTo(cx-6,cy-16);ctx.lineTo(cx,cy-11);
+    ctx.lineTo(cx+6,cy-16);ctx.lineTo(cx+8,cy-9);ctx.closePath();ctx.fill();
+    ctx.shadowBlur=0;
+  }else if(acc==='glasses'){
+    ctx.strokeStyle='rgba(60,60,60,0.9)';ctx.lineWidth=1.5;
+    ctx.fillStyle='rgba(40,40,80,0.45)';
+    ctx.beginPath();ctx.arc(cx-5,cy,3.5,0,Math.PI*2);ctx.fill();ctx.stroke();
+    ctx.beginPath();ctx.arc(cx+5,cy,3.5,0,Math.PI*2);ctx.fill();ctx.stroke();
+    ctx.beginPath();ctx.moveTo(cx-1.5,cy);ctx.lineTo(cx+1.5,cy);ctx.stroke();
+    ctx.shadowBlur=0;
+  }else if(acc==='santa'){
+    ctx.fillStyle='#cc1111';ctx.shadowColor='#ff2222';ctx.shadowBlur=6;
+    ctx.beginPath();
+    ctx.moveTo(cx-9,cy-9);ctx.lineTo(cx+9,cy-9);
+    ctx.lineTo(cx+3,cy-21);ctx.lineTo(cx-3,cy-21);ctx.closePath();ctx.fill();
+    ctx.shadowBlur=0;
+    ctx.fillStyle='rgba(255,255,255,0.95)';
+    ctx.fillRect(cx-9,cy-13,18,5);
+    ctx.beginPath();ctx.arc(cx,cy-22,4,0,Math.PI*2);ctx.fill();
+  }else if(acc==='pumpkin'){
+    ctx.fillStyle='#ff6a00';ctx.shadowColor='#ff4400';ctx.shadowBlur=9;
+    ctx.beginPath();ctx.arc(cx,cy-16,7,0,Math.PI*2);ctx.fill();
+    ctx.shadowBlur=0;
+    ctx.fillStyle='#000';
+    ctx.beginPath();ctx.arc(cx-3,cy-17,1.5,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(cx+3,cy-17,1.5,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='#000';ctx.lineWidth=1.2;
+    ctx.beginPath();ctx.arc(cx,cy-14,2.5,0.1,Math.PI-0.1);ctx.stroke();
+    ctx.strokeStyle='#2d8a00';ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(cx,cy-23);ctx.lineTo(cx+3,cy-26);ctx.stroke();
+  }else if(acc==='bunny'){
+    ctx.fillStyle='#ffaacc';ctx.shadowColor='#ff88bb';ctx.shadowBlur=5;
+    ctx.beginPath();ctx.ellipse(cx-5,cy-20,3,8,-0.15,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.ellipse(cx+5,cy-20,3,8,0.15,0,Math.PI*2);ctx.fill();
+    ctx.shadowBlur=0;
+    ctx.fillStyle='#ff5599';
+    ctx.beginPath();ctx.ellipse(cx-5,cy-20,1.5,5,-0.15,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.ellipse(cx+5,cy-20,1.5,5,0.15,0,Math.PI*2);ctx.fill();
+  }
+  ctx.restore();
+}
+function rRect(x,y,w,h,r){
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();
+}
+
+/* ═══════════════════════════════════════
+   HUD & FLASH
+   ═══════════════════════════════════════ */
+function updateHUD(){
+  $('scoreDisp').textContent=score;
+  $('levelDisp').textContent=[...activeOps].map(o=>({'+':'+','-':'−','*':'×','/':'÷'})[o]).join('/');
+  $('eqText').textContent=`${problem.expr} = ?`;
+  const base=10+(getSpeed()/10|0);
+  $('comboDisp').textContent=combo>1?t('comboBonus',{n:combo,b:Math.floor(base*(combo-1)*.4)}):
+                              goldPhase?t('comboGold'):'';
+  const ld=$('livesDisp');ld.innerHTML='';
+  if(practiceMode){
+    const d=document.createElement('div');
+    d.style.cssText='font-size:12px;font-family:\'Orbitron\',monospace;display:flex;align-items:center;gap:4px;';
+    d.innerHTML='🐍 <span style="color:var(--accent);font-size:16px;font-weight:900">'+snake.length+'</span>';
+    ld.appendChild(d);
+  }else{
+    for(let i=0;i<3;i++){const d=document.createElement('div');d.className='life'+(i>=lives?' lost':'');d.textContent='❤️';ld.appendChild(d);}
+  }
+}
+function flashFx(type){const el=type==='good'?$('flashGood'):$('flashBad');el.classList.add('show');setTimeout(()=>el.classList.remove('show'),170);}
+
+/* ═══════════════════════════════════════
+   GAME OVER — med statistik
+   ═══════════════════════════════════════ */
+function triggerGameOver(){
+  if(goldTimeout){clearTimeout(goldTimeout);goldTimeout=null;}goldPhase=false;
+  state='gameover';sfxDie();bgMusic.pause();fastMusic.pause();isFastMusic=false;
+  stopTitelMusic(true); // börja om från början när spelaren går till menyn
+  showTouchControls(false);
+  $('goScore').textContent=`Poäng: ${score}`;
+  const opsStr=[...activeOps].map(o=>({'+':'+','-':'−','*':'×','/':'÷'})[o]).join(' ');
+  const tStr=tables.size>0?` | tabellerna ${[...tables].sort((a,b)=>a-b).join(',')}`:'';
+  $('goMeta').textContent=`${opsStr} · inom ${numRange}${tStr}`;
+
+  // Bygg statistik-chips
+  const statsEl=$('goStats');statsEl.innerHTML='';
+  const pct=sessionTotal>0?Math.round((sessionCorrect/sessionTotal)*100):0;
+  const accClass=pct>=80?'good':pct>=50?'neutral':'bad';
+
+  const addChip=(text,cls)=>{
+    const c=document.createElement('div');c.className=`stat-chip ${cls}`;c.textContent=text;statsEl.appendChild(c);
+  };
+  addChip(t('chipCorrect',{c:sessionCorrect,t:sessionTotal}),accClass);
+  addChip(t('chipPct',{p:pct}),accClass);
+  if(wrongPool.length>0)addChip(t('chipPractice',{n:wrongPool.length}),'neutral');
+
+  $('hsNameInp').style.display=practiceMode?'none':'';
+  $('btnSaveScore').style.display=practiceMode?'none':'';
+  $('btnGoMenu').textContent=practiceMode?'🏠 Till huvudmenyn':t('btnGoMenu');
+  $('gameoverOverlay').classList.add('show');
+}
+
+/* ═══════════════════════════════════════
+   HIGHSCORE
+   ═══════════════════════════════════════ */
+const loadHS=()=>{try{return JSON.parse(localStorage.getItem(HS_KEY))||[];}catch(e){return[];}};
+const saveHS=hs=>localStorage.setItem(HS_KEY,JSON.stringify(hs));
+function addScore(name){
+  const hs=loadHS();
+  const desc=[...activeOps].map(o=>({'+':'+','-':'−','*':'×','/':'÷'})[o]).join('/')+' inom '+numRange;
+  hs.push({name:name.trim()||getPlayer(),score,desc});
+  hs.sort((a,b)=>b.score-a.score);saveHS(hs.slice(0,10));
+}
+function renderHS(){
+  const hs=loadHS(),el=$('menuHs');
+  if(!hs.length){el.innerHTML='<div class="hs-empty">'+t('hsEmpty')+'</div>';return;}
+  el.innerHTML=hs.slice(0,5).map((h,i)=>`
+    <div class="hs-row"><div class="hs-rank">${['🥇','🥈','🥉','4.','5.'][i]}</div>
+    <div class="hs-name">${esc(h.name)}</div><div class="hs-meta">${esc(h.desc||'')}</div>
+    <div class="hs-score">${h.score}</div></div>`).join('');
+}
+
+/* ═══════════════════════════════════════
+   SKÄRMAR & NAVIGERING
+   ═══════════════════════════════════════ */
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));$(id).classList.add('active');}
+function hideOverlays(){document.querySelectorAll('.overlay').forEach(o=>o.classList.remove('show'));}
+function showTouchControls(on){$('touchControls').classList.toggle('show',on);}
+function goToMenu(){
+  state='menu';bgMusic.pause();bgMusic.currentTime=0;fastMusic.pause();fastMusic.currentTime=0;isFastMusic=false;
+  if(goldTimeout){clearTimeout(goldTimeout);goldTimeout=null;}goldPhase=false;
+  showTouchControls(false);
+  hideOverlays();showScreen('menuScreen');renderHS();updateMedalNavBtn();updatePlayerBar();updateMenuSettingsSummary();
+  tryTitelMusic();
+}
+function goToMedals(){renderMedalsPage();showScreen('medalsScreen');}
+function goToHS(){renderHSPage();showScreen('hsScreen');}
+function renderHSPage(){
+  const hs=loadHS();
+  $('hsPageCount').textContent=`${hs.length} / 10 poster`;
+  const el=$('hsPageContent');el.innerHTML='';
+  if(!hs.length){el.innerHTML='<div class="hs-empty" style="padding:20px 0;font-size:13px">Inga poäng ännu — var den första! 🐍</div>';return;}
+  const medals=['🥇','🥈','🥉'];
+  hs.forEach((h,i)=>{
+    const row=document.createElement('div');
+    row.className='hs-row';row.style.cssText='padding:8px 4px;font-size:13px;';
+    row.innerHTML=`<div class="hs-rank" style="font-size:16px;width:28px">${medals[i]||`${i+1}.`}</div>
+      <div class="hs-name" style="font-size:13px">${esc(h.name)}</div>
+      <div class="hs-meta" style="font-size:11px">${esc(h.desc||'')}</div>
+      <div class="hs-score" style="font-size:14px">${h.score}</div>`;
+    el.appendChild(row);
+  });
+}
+
+/* ═══════════════════════════════════════
+   MENY: BUILDERS
+   ═══════════════════════════════════════ */
+function updateRangeHint(){const map={10:t('rangeHint10'),20:t('rangeHint20'),100:t('rangeHint100'),1000:t('rangeHint1000')};$('rangeHint').textContent=map[numRange]||'';}
+document.querySelectorAll('.range-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{numRange=parseInt(btn.dataset.r);
+    document.querySelectorAll('.range-btn').forEach(b=>b.classList.remove('sel'));
+    btn.classList.add('sel');updateRangeHint();deselectPreset();});
+});
+function buildTableGrid(){
+  const grid=$('tableGrid');grid.innerHTML='';
+  for(let n=2;n<=12;n++){
+    const btn=document.createElement('button');btn.className='tb-btn'+(tables.has(n)?' sel':'');
+    btn.textContent=`×${n}`;btn.dataset.n=n;
+    btn.addEventListener('click',()=>{
+      if(tables.has(n)){tables.delete(n);btn.classList.remove('sel');}else{tables.add(n);btn.classList.add('sel');}
+      updateTableQuickSel();deselectPreset();});
+    grid.appendChild(btn);
+  }
+}
+function updateTableQuickSel(){
+  const cur=[...tables].sort((a,b)=>a-b).join(',');
+  document.querySelectorAll('.tq-btn').forEach(btn=>{
+    btn.classList.toggle('sel',btn.dataset.tq.split(',').map(Number).sort((a,b)=>a-b).join(',')===cur);});
+}
+function setTables(arr){
+  tables=new Set(arr);
+  document.querySelectorAll('.tb-btn').forEach(btn=>btn.classList.toggle('sel',tables.has(parseInt(btn.dataset.n))));
+  updateTableQuickSel();
+}
+document.querySelectorAll('.tq-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{setTables(btn.dataset.tq.split(',').map(Number));deselectPreset();});
+});
+function updateTablePanelVisibility(){$('tablePanel').style.display=(activeOps.has('*')||activeOps.has('/'))? 'block':'none';}
+document.querySelectorAll('.op-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{const op=btn.dataset.op;
+    if(activeOps.has(op)){if(activeOps.size===1)return;activeOps.delete(op);btn.classList.remove('sel');}
+    else{activeOps.add(op);btn.classList.add('sel');}
+    updateTablePanelVisibility();deselectPreset();});
+});
+document.querySelectorAll('.speed-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{speedMode=btn.dataset.sm;
+    document.querySelectorAll('.speed-btn').forEach(b=>b.classList.remove('sel'));
+    btn.classList.add('sel');const sdMap={none:t('speedDescNone'),score:t('speedDescScore'),length:t('speedDescLength')};$('speedDesc').textContent=sdMap[speedMode]||'';});
+});
+// Väggar-toggle
+document.querySelectorAll('.toggle-btn[data-ww]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    wallWrap=btn.dataset.ww==='true';
+    btn.closest('.toggle-row').querySelectorAll('.toggle-btn').forEach(b=>b.classList.remove('sel'));
+    btn.classList.add('sel');
+  });
+});
+function buildGradeRow(){
+  const row=$('gradeRow');row.innerHTML='';
+  Object.entries(GRADES).forEach(([g,cfg])=>{
+    const btn=document.createElement('button');btn.className='preset-btn';btn.textContent=cfg.label;
+    btn.addEventListener('click',()=>{
+      activeOps=new Set(cfg.ops);numRange=cfg.range;if(cfg.tbls.length)setTables(cfg.tbls);
+      document.querySelectorAll('.op-btn').forEach(ob=>ob.classList.toggle('sel',activeOps.has(ob.dataset.op)));
+      document.querySelectorAll('.range-btn').forEach(rb=>rb.classList.toggle('sel',parseInt(rb.dataset.r)===numRange));
+      updateRangeHint();updateTablePanelVisibility();
+      document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');});
+    row.appendChild(btn);
+  });
+}
+function deselectPreset(){document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('sel'));}
+
+/* ═══════════════════════════════════════
+   NAMNMODAL
+   ═══════════════════════════════════════ */
+function showNameModal(){$('nameModalInp').value='';$('nameModal').classList.add('show');setTimeout(()=>$('nameModalInp').focus(),100);}
+function confirmName(){
+  const n=$('nameModalInp').value.trim();if(!n){$('nameModalInp').focus();return;}
+  savePlayer(n);$('nameModal').classList.remove('show');updatePlayerBar();
+}
+$('btnNameOk').addEventListener('click',confirmName);
+$('nameModalInp').addEventListener('keydown',e=>{if(e.key==='Enter')confirmName();});
+$('btnChangeName').addEventListener('click',showNameModal);
+$('btnLangSv').addEventListener('click',()=>setLang('sv'));
+$('btnLangEn').addEventListener('click',()=>setLang('en'));
+
+/* ═══════════════════════════════════════
+   TOUCH D-PAD & SVEP
+   ═══════════════════════════════════════ */
+function dpadPress(nd){if(state==='playing')applyDir(nd);}
+function setupDpad(){
+  const dirs={dUp:{x:0,y:-1},dDown:{x:0,y:1},dLeft:{x:-1,y:0},dRight:{x:1,y:0}};
+  Object.entries(dirs).forEach(([id,nd])=>{
+    const btn=$(id);
+    // Touch (snabbare respons)
+    btn.addEventListener('touchstart',e=>{e.preventDefault();dpadPress(nd);btn.classList.add('pressed');},{passive:false});
+    btn.addEventListener('touchend',e=>{e.preventDefault();btn.classList.remove('pressed');},{passive:false});
+    // Mus (för testning)
+    btn.addEventListener('mousedown',()=>{dpadPress(nd);});
+  });
+}
+
+// Svep-styrning på canvas
+let touchStartX=0,touchStartY=0,touchStartTime=0;
+canvas.addEventListener('touchstart',e=>{
+  e.preventDefault();
+  touchStartX=e.touches[0].clientX;
+  touchStartY=e.touches[0].clientY;
+  touchStartTime=Date.now();
+},{passive:false});
+canvas.addEventListener('touchend',e=>{
+  e.preventDefault();
+  if(state!=='playing')return;
+  const dx=e.changedTouches[0].clientX-touchStartX;
+  const dy=e.changedTouches[0].clientY-touchStartY;
+  const dt=Date.now()-touchStartTime;
+  if(dt>500)return; // för långsam = ingen svep
+  const MIN_SWIPE=25;
+  if(Math.abs(dx)<MIN_SWIPE&&Math.abs(dy)<MIN_SWIPE)return;
+  if(Math.abs(dx)>Math.abs(dy)){
+    applyDir(dx>0?{x:1,y:0}:{x:-1,y:0});
+  }else{
+    applyDir(dy>0?{x:0,y:1}:{x:0,y:-1});
+  }
+},{passive:false});
+
+/* ═══════════════════════════════════════
+   UI-TEMAN
+   ═══════════════════════════════════════ */
+const UI_THEME_BG={
+  natt:'radial-gradient(ellipse 80% 60% at 50% 0%,rgba(0,255,100,.06),transparent 60%),linear-gradient(180deg,#060c08,#03080a)',
+  skog:'radial-gradient(ellipse 80% 60% at 50% 0%,rgba(0,180,60,.1),transparent 60%),linear-gradient(180deg,#e8f5ec,#d0ecda)',
+  hav:'radial-gradient(ellipse 80% 60% at 50% 0%,rgba(0,100,220,.08),transparent 60%),linear-gradient(180deg,#e6eff8,#cce0f0)',
+  solnedgang:'radial-gradient(ellipse 80% 60% at 50% 0%,rgba(255,100,0,.1),transparent 60%),linear-gradient(180deg,#120808,#0a0404)',
+};
+function loadUITheme(){return localStorage.getItem('mattormen_ui_theme')||'natt';}
+function applyUITheme(id){
+  document.body.dataset.theme=id==='natt'?'':id;
+  document.body.style.background=UI_THEME_BG[id]||UI_THEME_BG.natt;
+  localStorage.setItem('mattormen_ui_theme',id);
+  document.querySelectorAll('.theme-btn').forEach(b=>b.classList.toggle('sel',b.dataset.theme===id));
+}
+
+/* ═══════════════════════════════════════
+   SPELLÄGE (standard / övning)
+   ═══════════════════════════════════════ */
+let practiceMode=false;
+function applyMode(m){
+  practiceMode=(m==='practice');
+  localStorage.setItem('mattormen_mode',m);
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.toggle('sel',b.dataset.mode===m));
+  const desc={standard:'3 liv. Fel svar krymper ormen och tappar ett liv.',
+    practice:'Inga liv. Fel svar → minuspoäng och ormen krymper. Game over när ormen är för kort!'};
+  if($('modeDesc'))$('modeDesc').textContent=desc[m]||'';
+}
+
+/* ═══════════════════════════════════════
+   PAUS — nytt tal vid varje paus
+   ═══════════════════════════════════════ */
+function pauseGame(){
+  if(state!=='playing')return;
+  state='paused';
+  $('pauseOverlay').classList.add('show');
+  bgMusic.pause();fastMusic.pause();
+  problem=genProblem();placeTiles();updateHUD();
+}
+
+/* ═══════════════════════════════════════
+   INSTÄLLNINGSSIDA
+   ═══════════════════════════════════════ */
+function goToSettings(){showScreen('settingsScreen');}
+function updateMenuSettingsSummary(){
+  const el=$('menuSettingsSummary');if(!el)return;
+  const om={'+':'➕','-':'➖','*':'✖️','/':'➗'};
+  const opsStr=[...activeOps].map(o=>om[o]||o).join(' ');
+  const rm={10:'Inom 10',20:'Upp till 20',100:'Upp till 100',1000:'Upp till 1000'};
+  el.textContent=opsStr+' · '+(rm[numRange]||'');
+}
+
+/* ═══════════════════════════════════════
+   KNAPPAR
+   ═══════════════════════════════════════ */
+$('btnPlay').addEventListener('click',startGame);
+document.querySelectorAll('.theme-btn').forEach(btn=>btn.addEventListener('click',()=>applyUITheme(btn.dataset.theme)));
+document.querySelectorAll('.mode-btn').forEach(btn=>btn.addEventListener('click',()=>applyMode(btn.dataset.mode)));
+$('btnGoSettings').addEventListener('click',goToSettings);
+$('btnBackFromSettings').addEventListener('click',()=>{updateMenuSettingsSummary();showScreen('menuScreen');});
+$('btnGoMedals').addEventListener('click',goToMedals);
+$('btnGoHS').addEventListener('click',goToHS);
+$('btnBackFromMedals').addEventListener('click',()=>showScreen('menuScreen'));
+$('btnBackFromSkins').addEventListener('click',()=>showScreen('menuScreen'));
+$('btnGoSkins').addEventListener('click',goToSkins);
+$('btnBackFromHS').addEventListener('click',()=>showScreen('menuScreen'));
+$('btnClearHS').addEventListener('click',()=>{if(confirm('Rensa hela highscorelistan?')){localStorage.removeItem(HS_KEY);renderHS();renderHSPage();}});
+$('btnMenuMusic').addEventListener('click',toggleMusic);
+$('btnResume').addEventListener('click',()=>{state='playing';$('pauseOverlay').classList.remove('show');tryMusic();lastTickTime=performance.now();requestAnimationFrame(gameLoop);});
+$('btnPauseMenu').addEventListener('click',goToMenu);
+$('btnSaveScore').addEventListener('click',()=>{if(!practiceMode)addScore($('hsNameInp').value);goToMenu();});
+$('btnGoMenu').addEventListener('click',goToMenu);
+$('hsNameInp').addEventListener('keydown',e=>{if(e.key==='Enter')$('btnSaveScore').click();});
+$('btnExport').addEventListener('click',exportData);
+$('btnImport').addEventListener('click',()=>$('importFile').click());
+$('importFile').addEventListener('change',e=>{if(e.target.files[0])importData(e.target.files[0]);e.target.value='';});
+document.addEventListener('pointerdown',()=>{if(!audioUnlocked&&musicOn)tryTitelMusic();},{once:true});
+
+/* ═══════════════════════════════════════
+   TANGENTBORDSINPUT
+   ═══════════════════════════════════════ */
+document.addEventListener('keydown',e=>{
+  if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();
+  if(state==='playing'){
+    const map={ArrowUp:{x:0,y:-1},w:{x:0,y:-1},W:{x:0,y:-1},
+      ArrowDown:{x:0,y:1},s:{x:0,y:1},S:{x:0,y:1},
+      ArrowLeft:{x:-1,y:0},a:{x:-1,y:0},A:{x:-1,y:0},
+      ArrowRight:{x:1,y:0},d:{x:1,y:0},D:{x:1,y:0}};
+    const nd=map[e.key];if(nd)applyDir(nd);
+    if(e.key==='p'||e.key==='P')pauseGame();
+    if(e.key==='Escape')goToMenu();if(e.key==='m'||e.key==='M')toggleMusic();
+  }else if(state==='paused'){
+    if(['p','P','Escape'].includes(e.key)){state='playing';$('pauseOverlay').classList.remove('show');tryMusic();lastTickTime=performance.now();requestAnimationFrame(gameLoop);}
+  }
+});
+
+/* ═══════════════════════════════════════
+   INIT
+   ═══════════════════════════════════════ */
+// Init lang-knappar
+const _il=getLang();$('btnLangSv').classList.toggle('sel',_il==='sv');$('btnLangEn').classList.toggle('sel',_il==='en');
+buildGradeRow();buildTableGrid();updateRangeHint();updateTablePanelVisibility();
+const sdMap2={none:t('speedDescNone'),score:t('speedDescScore'),length:t('speedDescLength')};
+$('speedDesc').textContent=sdMap2[speedMode]||'';
+updateMenuMusicBtn();
+// Säkerställ att gratisormskinn är upplåsta
+const _us=loadUnlockedSkins();let _usc=false;
+SKINS_DEF.filter(s=>s.free).forEach(s=>{if(!_us.has(s.id)){_us.add(s.id);_usc=true;}});
+if(_usc)saveUnlockedSkins(_us);
+// Synka skinn från redan upplåsta medaljer
+syncSkinsFromMedals();
+renderHS();updateMedalNavBtn();updateSkinNavBtn();updatePlayerBar();setupDpad();
+applyUITheme(loadUITheme());
+applyMode(localStorage.getItem('mattormen_mode')||'standard');
+applyLang();
+if(!loadPlayer())showNameModal();
+</script>
+
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
