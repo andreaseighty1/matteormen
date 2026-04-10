@@ -145,7 +145,7 @@ body{display:flex;flex-direction:column;align-items:center;justify-content:cente
 
 /* ── SPELSKÄRM ── */
 .game-wrap{display:flex;flex-direction:column;align-items:center;width:100%;max-width:400px}
-.game-top{display:flex;justify-content:space-between;align-items:center;width:100%;padding:4px 2px}
+.game-top{display:flex;justify-content:center;align-items:center;width:100%;padding:4px 2px;gap:24px}
 .g-stat{font-family:'Orbitron',monospace;font-size:10px;color:var(--muted)}
 .g-stat span{color:var(--accent);font-size:16px;display:block;line-height:1.1}
 .g-lives{display:flex;gap:4px;justify-content:center}
@@ -163,20 +163,20 @@ canvas{border:1px solid var(--line);border-radius:12px;touch-action:none;
 
 /* ── TOUCH D-PAD ── */
 #touchControls{
-  display:none;flex-direction:column;align-items:center;gap:3px;
-  width:100%;max-width:340px;padding:4px 0 2px;
+  display:none;flex-direction:column;align-items:center;gap:2px;
+  width:100%;max-width:320px;padding:2px 0 2px;
 }
 #touchControls.show{display:flex}
 .dpad-row{display:flex;gap:4px;}
 .dpad-btn{
-  width:50px;height:50px;border:2px solid rgba(0,255,136,.35);border-radius:12px;
-  background:rgba(0,255,136,.1);color:var(--accent);font-size:18px;
+  width:44px;height:44px;border:2px solid rgba(0,255,136,.35);border-radius:10px;
+  background:rgba(0,255,136,.1);color:var(--accent);font-size:16px;
   cursor:pointer;display:flex;align-items:center;justify-content:center;
   user-select:none;-webkit-user-select:none;touch-action:manipulation;
   transition:background .08s;backdrop-filter:blur(4px);
 }
 .dpad-btn:active,.dpad-btn.pressed{background:rgba(0,255,136,.32);border-color:var(--accent);}
-.dpad-center{width:50px;height:50px;}/* spacer */
+.dpad-center{width:44px;height:44px;}/* spacer */
 
 /* ── MEDALJER-SIDA ── */
 .medals-page{width:100%;max-width:640px;padding:8px 0 40px;}
