@@ -553,10 +553,7 @@ canvas{border:1px solid var(--line);border-radius:12px;touch-action:none;
     </div>
     <div id="hsPageContent"></div>
     <div class="export-row" style="margin-top:12px">
-      <button class="export-btn" id="btnExport">💾 Spara medaljer &amp; highscore</button>
-      <button class="export-btn" id="btnImport">📂 Ladda in sparfil</button>
       <button class="export-btn" id="btnClearHS">🗑️ Rensa highscore</button>
-      <input type="file" id="importFile" accept=".json" style="display:none">
     </div>
   </div>
 </div>
@@ -1443,7 +1440,9 @@ function updateMusicMode(){
 function updateMenuMusicBtn(){
   const icon=musicOn?'🔊 ':'🔇 ';
   const txt=getLang()==='en'?'Music':'Musik';
-  $('btnMenuMusic').innerHTML=icon+'<span id="musicBtnText">'+txt+'</span>';
+  const span=$('musicBtnText');
+  if(span){span.textContent=txt;$('btnMenuMusic').firstChild.textContent=icon;}
+  else{$('btnMenuMusic').innerHTML=icon+'<span id="musicBtnText">'+txt+'</span>';}
 }
 function toggleMusic(){
   musicOn=!musicOn;
@@ -2235,17 +2234,24 @@ $('btnBackFromMedals').addEventListener('click',()=>showScreen('menuScreen'));
 $('btnBackFromSkins').addEventListener('click',()=>showScreen('menuScreen'));
 $('btnGoSkins').addEventListener('click',goToSkins);
 $('btnBackFromHS').addEventListener('click',()=>showScreen('menuScreen'));
-$('btnClearHS').addEventListener('click',()=>{if(confirm('Rensa hela highscorelistan?')){localStorage.removeItem(HS_KEY);renderHS();renderHSPage();}});
+$('btnClearHS').addEventListener('click',()=>{
+  const msg=getLang()==='en'?'Clear the entire highscore list?':'Rensa hela highscorelistan?';
+  const yes=getLang()==='en'?'Are you sure?':'Är du säker?';
+  if(confirm(yes+'\n'+msg)){localStorage.removeItem(HS_KEY);renderHS();renderHSPage();}
+});
 $('btnMenuMusic').addEventListener('click',toggleMusic);
 $('btnResume').addEventListener('click',()=>{state='playing';$('pauseOverlay').classList.remove('show');tryMusic();lastTickTime=performance.now();requestAnimationFrame(gameLoop);});
 $('btnPauseMenu').addEventListener('click',goToMenu);
 $('btnSaveScore').addEventListener('click',()=>{if(!practiceMode)addScore($('hsNameInp').value);goToMenu();});
 $('btnGoMenu').addEventListener('click',goToMenu);
 $('hsNameInp').addEventListener('keydown',e=>{if(e.key==='Enter')$('btnSaveScore').click();});
-$('btnExport').addEventListener('click',exportData);
-$('btnImport').addEventListener('click',()=>$('importFile').click());
-$('importFile').addEventListener('change',e=>{if(e.target.files[0])importData(e.target.files[0]);e.target.value='';});
-document.addEventListener('pointerdown',()=>{if(!audioUnlocked&&musicOn)tryTitelMusic();},{once:true});
+// Export/import borttaget i mobilversion — localStorage hanterar allt automatiskt
+document.addEventListener('pointerdown',()=>{
+  if(!audioUnlocked&&musicOn){
+    tryTitelMusic();
+    audioUnlocked=true;
+  }
+},{once:true});
 
 /* ═══════════════════════════════════════
    TANGENTBORDSINPUT
