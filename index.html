@@ -632,7 +632,7 @@ canvas{border:1px solid var(--line);border-radius:12px;touch-action:none;
 <div class="flash-good" id="flashGood"></div>
 <div class="flash-bad"  id="flashBad"></div>
 <div id="medalToast"></div>
-<div class="copyright" id="copyrightEl">© 2026 Andreas Jonsson – Skapad med Claude AI 🐍 &nbsp;·&nbsp; v3.0</div>
+<div class="copyright" id="copyrightEl"></div>
 
 <script>
 /* ═══════════════════════════════════════
@@ -666,6 +666,14 @@ const STRINGS={
     panelTableIndiv:'Välj enskilda:',
     panelSpeed:'🏃 Hastighetsökning',
     panelWalls:'🧱 Väggar',
+    panelMode:'🎮 Spelläge',
+    panelAppearance:'🎨 Utseende',
+    modeStandard:'⚔️ Standard',
+    modePractice:'📚 Övning',
+    modeDescStandard:'3 liv. Fel svar krymper ormen och tappar ett liv.',
+    modeDescPractice:'Inga liv. Fel svar → minuspoäng och ormen krymper. Game over när ormen är för kort!',
+    themeNight:'🌑 Natt',themeForest:'🌿 Skog',themeOcean:'🌊 Hav',themeSunset:'🌅 Solnedgång',
+    settingsBack:'← Tillbaka',settingsTitle:'⚙️ INSTÄLLNINGAR',
     speedNone:'Ingen ändring',
     speedScore:'⬆ Poängbaserad',
     speedLength:'⬆ Längdbaserad',
@@ -707,7 +715,7 @@ const STRINGS={
     chipPct:'{p}% träffsäkerhet',
     chipPractice:'🔁 {n} frågor att öva',
     newRecord:'🏆 Nytt rekord!',
-    copyright:'© 2026 Andreas Jonsson – Skapad med Claude AI 🐍 &nbsp;·&nbsp; v3.0<br><span style="font-size:10px;opacity:.6">Idéer & feedback: Cecilia Norlander</span>',
+    copyright:'© 2026 Andreas Jonsson – Skapad med Claude AI 🐍 &nbsp;·&nbsp; v3.0',
     skinsBtnLabel:'ORMSKINN',
     skinsTitle:'🎨 ORMSKINN',
     skinsCount:'{n} / {tot} upplåsta',
@@ -740,6 +748,14 @@ const STRINGS={
     speedDescLength:'The snake speeds up the longer it gets.',
     wallDie:'☠️ Die on walls',
     wallWrap:'🔄 Wrap around',
+    panelMode:'🎮 Game mode',
+    panelAppearance:'🎨 Appearance',
+    modeStandard:'⚔️ Standard',
+    modePractice:'📚 Practice',
+    modeDescStandard:'3 lives. Wrong answer shrinks the snake and costs a life.',
+    modeDescPractice:'No lives. Wrong answer → minus points and snake shrinks. Game over when too short!',
+    themeNight:'🌑 Night',themeForest:'🌿 Forest',themeOcean:'🌊 Ocean',themeSunset:'🌅 Sunset',
+    settingsBack:'← Back',settingsTitle:'⚙️ SETTINGS',
     rangeHint10:'E.g: 3+4, 9−5, 1+8',
     rangeHint20:'E.g: 8+5, 14−7, 9+7 (bridging)',
     rangeHint100:'E.g: 23+45, 71−38, 56+19',
@@ -773,7 +789,7 @@ const STRINGS={
     chipPct:'{p}% accuracy',
     chipPractice:'🔁 {n} questions to practice',
     newRecord:'🏆 New record!',
-    copyright:'© 2026 Andreas Jonsson – Created with Claude AI 🐍 &nbsp;·&nbsp; v3.0<br><span style="font-size:10px;opacity:.6">Ideas & feedback: Cecilia Norlander</span>',
+    copyright:'© 2026 Andreas Jonsson – Created with Claude AI 🐍 &nbsp;·&nbsp; v3.0',
     skinsBtnLabel:'SNAKE SKINS',
     skinsTitle:'🎨 SNAKE SKINS',
     skinsCount:'{n} / {tot} unlocked',
@@ -877,6 +893,20 @@ function applyLang(){
   // Medals/HS page titles
   if($('mpTitleEl'))$('mpTitleEl').textContent=t('mpTitle');
   if($('copyrightEl'))$('copyrightEl').innerHTML=t('copyright');
+  if($('btnBackFromSettings'))$('btnBackFromSettings').textContent=t('settingsBack');
+  document.querySelectorAll('.mode-btn').forEach(b=>{
+    if(b.dataset.mode==='standard')b.textContent=t('modeStandard');
+    if(b.dataset.mode==='practice')b.textContent=t('modePractice');
+  });
+  if($('modeDesc'))$('modeDesc').textContent=t(practiceMode?'modeDescPractice':'modeDescStandard');
+  document.querySelectorAll('.theme-btn').forEach(b=>{
+    const tmap={natt:t('themeNight'),skog:t('themeForest'),hav:t('themeOcean'),solnedgang:t('themeSunset')};
+    if(tmap[b.dataset.theme])b.textContent=tmap[b.dataset.theme];
+  });
+  const spts=document.querySelectorAll('#settingsScreen .panel-title');
+  const ptKeys=['panelOps','panelRange','panelTables','panelSpeed','panelWalls','panelMode','panelAppearance'];
+  spts.forEach((el,i)=>{if(ptKeys[i])el.textContent=t(ptKeys[i]);});
+  buildGradeRow();
   // Speed description (uppdatera med nuvarande speedMode)
   const _sdMap={none:t('speedDescNone'),score:t('speedDescScore'),length:t('speedDescLength')};
   if($('speedDesc'))$('speedDesc').textContent=_sdMap[speedMode]||'';
@@ -1758,7 +1788,7 @@ function draw(t){
       ctx.fillStyle=`rgba(255,215,0,${0.35*fade})`;rRect(3,3,CELL-6,CELL-6,12);ctx.fill();
       ctx.strokeStyle=`rgba(255,215,0,${fade})`;ctx.lineWidth=2.5;rRect(3,3,CELL-6,CELL-6,12);ctx.stroke();
       ctx.shadowBlur=0;ctx.fillStyle=`rgba(255,229,102,${fade})`;
-      ctx.font=`900 ${fs}px 'Orbitron',monospace`;ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.font=`900 ${fs}px Nunito,'Exo 2',sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
       ctx.fillText(val,CELL/2,CELL/2);
       ctx.restore();
     }
@@ -1786,7 +1816,10 @@ function draw(t){
   }
 }
 function drawTile(t){
-  const px=t.x*CELL+3,py=t.y*CELL+3,s=CELL-6,val=String(t.value),fs=val.length<=2?17:val.length===3?13:11;
+  const pad=Math.max(2,Math.floor(CELL*0.1));
+  const px=t.x*CELL+pad,py=t.y*CELL+pad,s=CELL-pad*2;
+  const val=String(t.value);
+  const fs=val.length<=2?Math.min(18,Math.floor(CELL*0.52)):val.length===3?Math.min(14,Math.floor(CELL*0.4)):Math.min(11,Math.floor(CELL*0.32));
   if(t.isGold){
     ctx.shadowColor='rgba(255,215,0,.9)';ctx.shadowBlur=22;
     ctx.fillStyle='rgba(255,215,0,.35)';rRect(px,py,s,s,12);ctx.fill();
@@ -1794,11 +1827,11 @@ function drawTile(t){
     ctx.shadowBlur=0;ctx.fillStyle='#ffe566';
   }else{
     ctx.shadowColor='rgba(140,190,255,.6)';ctx.shadowBlur=13;
-    ctx.fillStyle='rgba(80,140,255,.18)';rRect(px,py,s,s,12);ctx.fill();
-    ctx.strokeStyle='rgba(160,210,255,.65)';ctx.lineWidth=1.8;rRect(px,py,s,s,12);ctx.stroke();
+    ctx.fillStyle='rgba(80,140,255,.22)';rRect(px,py,s,s,Math.floor(CELL*0.35));ctx.fill();
+    ctx.strokeStyle='rgba(160,210,255,.75)';ctx.lineWidth=1.8;rRect(px,py,s,s,12);ctx.stroke();
     ctx.shadowBlur=0;ctx.fillStyle='#eaf5ff';
   }
-  ctx.font=`900 ${fs}px 'Orbitron',monospace`;ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.font=`900 ${fs}px Nunito,'Exo 2',sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
   ctx.shadowColor=t.isGold?'rgba(255,200,0,.85)':'rgba(160,220,255,.8)';ctx.shadowBlur=t.isGold?9:5;
   ctx.fillText(val,t.x*CELL+CELL/2,t.y*CELL+CELL/2);ctx.shadowBlur=0;
 }
@@ -2051,7 +2084,7 @@ document.querySelectorAll('.toggle-btn[data-ww]').forEach(btn=>{
 function buildGradeRow(){
   const row=$('gradeRow');row.innerHTML='';
   Object.entries(GRADES).forEach(([g,cfg])=>{
-    const btn=document.createElement('button');btn.className='preset-btn';btn.textContent=cfg.label;
+    const btn=document.createElement('button');btn.className='preset-btn';btn.textContent=getLang()==='en'&&cfg.labelEn?cfg.labelEn:cfg.label;
     btn.addEventListener('click',()=>{
       activeOps=new Set(cfg.ops);numRange=cfg.range;if(cfg.tbls.length)setTables(cfg.tbls);
       document.querySelectorAll('.op-btn').forEach(ob=>ob.classList.toggle('sel',activeOps.has(ob.dataset.op)));
