@@ -436,7 +436,7 @@ canvas{border:1px solid var(--line);border-radius:12px;touch-action:none;
   <div class="player-bar" id="playerBar">
     <span id="playerGreeting"></span>
     <button id="btnChangeName">✏️ Byt namn</button>
-    <button id="btnMenuMusic">🔊 Musik</button>
+    <button id="btnMenuMusic">🔊 <span id="musicBtnText">Musik</span></button>
   </div>
   <img id="menuBanner" src="matteormen_banner.png"
        style="width:min(290px,76vw);margin-bottom:5px;filter:drop-shadow(0 0 22px rgba(0,200,80,.5))"
@@ -449,7 +449,7 @@ canvas{border:1px solid var(--line);border-radius:12px;touch-action:none;
   </div>
   <button class="play-btn" id="btnPlay">▶ STARTA SPELET</button>
   <div class="menu-nav-grid">
-    <button class="menu-nav-btn" id="btnGoSettings">⚙️<span>Inställningar</span></button>
+    <button class="menu-nav-btn" id="btnGoSettings">⚙️<span id="settingsBtnLabel">Inställningar</span></button>
     <button class="menu-nav-btn" id="btnGoMedals"><div class="mn-emoji">🏅</div><div class="mn-label">MEDALJER</div><div class="mn-count" id="medalsBtnCount">0 / 0</div></button>
     <button class="menu-nav-btn" id="btnGoSkins"><div class="mn-emoji">🎨</div><div id="skinsBtnLabel">ORMSKINN</div><div class="mn-count" id="skinsBtnCount">0 / 0</div></button>
     <button class="menu-nav-btn" id="btnGoHS"><div class="mn-emoji">🏆</div><span>Highscore</span></button>
@@ -461,8 +461,8 @@ canvas{border:1px solid var(--line);border-radius:12px;touch-action:none;
 <div class="screen" id="settingsScreen">
   <div class="medals-page">
     <div class="medals-page-top">
-      <button class="back-btn" id="btnBackFromSettings">← Tillbaka</button>
-      <div class="mp-title">⚙️ INSTÄLLNINGAR</div>
+      <button class="back-btn" id="btnBackFromSettings">← <span id="settingsBackText">Tillbaka</span></button>
+      <div class="mp-title" id="settingsTitleEl">⚙️ INSTÄLLNINGAR</div>
     </div>
     <div style="width:100%;max-width:600px;">
       <div class="menu-panel" style="margin-bottom:10px;">
@@ -699,6 +699,7 @@ const STRINGS={
     hintPause:'paus',hintMenu:'meny',hintMusic:'musik',
     pauseTitle:'PAUS',btnResume:'▶ Fortsätt',btnPauseMenu:'Meny',
     gameOver:'GAME OVER',
+    goScoreLabel:'Poäng:',
     hsPlaceholder:'Ditt namn för highscore…',
     btnSaveScore:'💾 Spara poäng',btnGoMenu:'Hoppa över',
     nameModalTitle:'👋 Hej!',
@@ -773,6 +774,7 @@ const STRINGS={
     hintPause:'pause',hintMenu:'menu',hintMusic:'music',
     pauseTitle:'PAUSE',btnResume:'▶ Resume',btnPauseMenu:'Menu',
     gameOver:'GAME OVER',
+    goScoreLabel:'Score:',
     hsPlaceholder:'Your name for highscore…',
     btnSaveScore:'💾 Save score',btnGoMenu:'Skip',
     nameModalTitle:'👋 Hi!',
@@ -893,6 +895,24 @@ function applyLang(){
   // Medals/HS page titles
   if($('mpTitleEl'))$('mpTitleEl').textContent=t('mpTitle');
   if($('copyrightEl'))$('copyrightEl').innerHTML=t('copyright');
+  if($('settingsTitleEl'))$('settingsTitleEl').textContent=t('settingsTitle');
+  if($('settingsBtnLabel'))$('settingsBtnLabel').textContent=getLang()==='en'?'Settings':'Inställningar';
+  if($('settingsBackText'))$('settingsBackText').textContent=t('settingsBack');
+  updateMenuMusicBtn();
+  document.querySelectorAll('.mode-btn').forEach(b=>{
+    if(b.dataset.mode==='standard')b.textContent=t('modeStandard');
+    if(b.dataset.mode==='practice')b.textContent=t('modePractice');
+  });
+  if($('modeDesc'))$('modeDesc').textContent=t(practiceMode?'modeDescPractice':'modeDescStandard');
+  document.querySelectorAll('.theme-btn').forEach(b=>{
+    const tmap={natt:t('themeNight'),skog:t('themeForest'),hav:t('themeOcean'),solnedgang:t('themeSunset')};
+    if(tmap[b.dataset.theme])b.textContent=tmap[b.dataset.theme];
+  });
+  const spts=document.querySelectorAll('#settingsScreen .panel-title');
+  const ptKeys=['panelOps','panelRange','panelTables','panelSpeed','panelWalls','panelMode','panelAppearance'];
+  spts.forEach((el,i)=>{if(ptKeys[i])el.textContent=t(ptKeys[i]);});
+  buildGradeRow();
+  updateMenuSettingsSummary();
   if($('btnBackFromSettings'))$('btnBackFromSettings').textContent=t('settingsBack');
   document.querySelectorAll('.mode-btn').forEach(b=>{
     if(b.dataset.mode==='standard')b.textContent=t('modeStandard');
@@ -926,29 +946,29 @@ const GRADES={
    MEDALJER (21 st)
    ═══════════════════════════════════════ */
 const MEDALS_DEF=[
-  {id:'p500',    emoji:'⭐',name:'500 Poäng',              desc:'Nå 500 poäng i ett spel',                     cat:'🏅 Poäng', nameEn:'500 Points', descEn:'Score 500 points in one game'},
-  {id:'p2000',   emoji:'🌟',name:'2 000 Poäng',            desc:'Nå 2 000 poäng i ett spel',                   cat:'🏅 Poäng', nameEn:'2,000 Points', descEn:'Score 2,000 points in one game'},
-  {id:'p5000',   emoji:'🏆',name:'5 000 Poäng',            desc:'Nå 5 000 poäng i ett spel',                   cat:'🏅 Poäng', nameEn:'5,000 Points', descEn:'Score 5,000 points in one game'},
-  {id:'p10000',  emoji:'👑',name:'10 000 Poäng',           desc:'Nå 10 000 poäng i ett spel',                  cat:'🏅 Poäng', nameEn:'10,000 Points', descEn:'Score 10,000 points in one game'},
-  {id:'add1000', emoji:'➕',name:'Additionshjälte',        desc:'Tjäna 1 000p på additionstal (alla spel)',     cat:'🔢 Räknesätt', nameEn:'Addition Hero', descEn:'Earn 1,000pts on addition (all games)'},
-  {id:'sub1000', emoji:'➖',name:'Subtraktionshjälte',     desc:'Tjäna 1 000p på subtraktionstal (alla spel)',  cat:'🔢 Räknesätt', nameEn:'Subtraction Hero', descEn:'Earn 1,000pts on subtraction (all games)'},
-  {id:'mul500',  emoji:'✖️',name:'Multiplikationsmästare', desc:'Tjäna 500p på multiplikationstal (alla spel)', cat:'🔢 Räknesätt', nameEn:'Multiplication Master', descEn:'Earn 500pts on multiplication (all games)'},
-  {id:'div500',  emoji:'➗',name:'Divisionsmästare',       desc:'Tjäna 500p på divisionstal (alla spel)',       cat:'🔢 Räknesätt', nameEn:'Division Master', descEn:'Earn 500pts on division (all games)'},
-  {id:'c5',      emoji:'🔥',name:'Hetsar på!',             desc:'5 rätt i rad',                                 cat:'🔥 Combo', nameEn:'Heating Up!', descEn:'5 correct in a row'},
-  {id:'c10',     emoji:'💎',name:'Oöverträffad',           desc:'10 rätt i rad',                                cat:'🔥 Combo', nameEn:'Unbeatable', descEn:'10 correct in a row'},
-  {id:'c15',     emoji:'⚡',name:'Blixtfingrar',           desc:'15 rätt i rad',                                cat:'🔥 Combo', nameEn:'Lightning Fingers', descEn:'15 correct in a row'},
-  {id:'c20',     emoji:'🌊',name:'På vågen!',              desc:'20 rätt i rad',                                cat:'🔥 Combo', nameEn:'On a Roll!', descEn:'20 correct in a row'},
-  {id:'c25',     emoji:'🎯',name:'Prickskytt',             desc:'25 rätt i rad',                                cat:'🔥 Combo', nameEn:'Sharpshooter', descEn:'25 correct in a row'},
-  {id:'c30',     emoji:'🚀',name:'Raketstart',             desc:'30 rätt i rad',                                cat:'🔥 Combo', nameEn:'Rocketstart', descEn:'30 correct in a row'},
-  {id:'c50',     emoji:'🦁',name:'Lejonhjärta',            desc:'50 rätt i rad',                                cat:'🔥 Combo', nameEn:'Lionheart', descEn:'50 correct in a row'},
-  {id:'c75',     emoji:'🌟',name:'Stjärnstatus',           desc:'75 rätt i rad',                                cat:'🔥 Combo', nameEn:'Star Status', descEn:'75 correct in a row'},
-  {id:'c100',    emoji:'💯',name:'HUNDRA I RAD!',          desc:'100 rätt i rad — legendariskt!',              cat:'🔥 Combo', nameEn:'ONE HUNDRED!', descEn:'100 correct in a row — legendary!'},
-  {id:'len15',   emoji:'📏',name:'Stor orm',               desc:'Nå längd 15',                                  cat:'🐍 Orm', nameEn:'Big Snake', descEn:'Reach length 15'},
-  {id:'len25',   emoji:'🐍',name:'Jätteorm!',              desc:'Nå längd 25',                                  cat:'🐍 Orm', nameEn:'Giant Snake!',    descEn:'Reach length 25'},
-  {id:'len35',   emoji:'🦕',name:'Dinosarieorm!',          desc:'Nå längd 35',                                  cat:'🐍 Orm', nameEn:'Dinosaur Snake!', descEn:'Reach length 35'},
-  {id:'len50',   emoji:'🌍',name:'Världsrekordsorm!',      desc:'Nå längd 50 — nästan omöjligt!',               cat:'🐍 Orm', nameEn:'World Record Snake!', descEn:'Reach length 50 — nearly impossible!'},
-  {id:'osviklig',emoji:'❤️',name:'Felfri',                 desc:'10 rätt utan att tappa ett enda liv',          cat:'⭐ Special', nameEn:'Flawless', descEn:'10 correct without losing a single life'},
-  {id:'genius',  emoji:'🧠',name:'Mattegeni',              desc:'1 000p på Åk6 med alla 4 räknesätt',          cat:'⭐ Special', nameEn:'Math Genius', descEn:'1,000pts on grade 6 with all 4 operations'},
+  {id:'p500',    emoji:'⭐',name:'500 Poäng',              desc:'Nå 500 poäng i ett spel',                     cat:'🏅 Poäng', catEn:'🏅 Score', nameEn:'500 Points', descEn:'Score 500 points in one game'},
+  {id:'p2000',   emoji:'🌟',name:'2 000 Poäng',            desc:'Nå 2 000 poäng i ett spel',                   cat:'🏅 Poäng', catEn:'🏅 Score', nameEn:'2,000 Points', descEn:'Score 2,000 points in one game'},
+  {id:'p5000',   emoji:'🏆',name:'5 000 Poäng',            desc:'Nå 5 000 poäng i ett spel',                   cat:'🏅 Poäng', catEn:'🏅 Score', nameEn:'5,000 Points', descEn:'Score 5,000 points in one game'},
+  {id:'p10000',  emoji:'👑',name:'10 000 Poäng',           desc:'Nå 10 000 poäng i ett spel',                  cat:'🏅 Poäng', catEn:'🏅 Score', nameEn:'10,000 Points', descEn:'Score 10,000 points in one game'},
+  {id:'add1000', emoji:'➕',name:'Additionshjälte',        desc:'Tjäna 1 000p på additionstal (alla spel)',     cat:'🔢 Räknesätt', catEn:'🔢 Operations', nameEn:'Addition Hero', descEn:'Earn 1,000pts on addition (all games)'},
+  {id:'sub1000', emoji:'➖',name:'Subtraktionshjälte',     desc:'Tjäna 1 000p på subtraktionstal (alla spel)',  cat:'🔢 Räknesätt', catEn:'🔢 Operations', nameEn:'Subtraction Hero', descEn:'Earn 1,000pts on subtraction (all games)'},
+  {id:'mul500',  emoji:'✖️',name:'Multiplikationsmästare', desc:'Tjäna 500p på multiplikationstal (alla spel)', cat:'🔢 Räknesätt', catEn:'🔢 Operations', nameEn:'Multiplication Master', descEn:'Earn 500pts on multiplication (all games)'},
+  {id:'div500',  emoji:'➗',name:'Divisionsmästare',       desc:'Tjäna 500p på divisionstal (alla spel)',       cat:'🔢 Räknesätt', catEn:'🔢 Operations', nameEn:'Division Master', descEn:'Earn 500pts on division (all games)'},
+  {id:'c5',      emoji:'🔥',name:'Hetsar på!',             desc:'5 rätt i rad',                                 cat:'🔥 Combo', catEn:'🔥 Combo', nameEn:'Heating Up!', descEn:'5 correct in a row'},
+  {id:'c10',     emoji:'💎',name:'Oöverträffad',           desc:'10 rätt i rad',                                cat:'🔥 Combo', catEn:'🔥 Combo', nameEn:'Unbeatable', descEn:'10 correct in a row'},
+  {id:'c15',     emoji:'⚡',name:'Blixtfingrar',           desc:'15 rätt i rad',                                cat:'🔥 Combo', catEn:'🔥 Combo', nameEn:'Lightning Fingers', descEn:'15 correct in a row'},
+  {id:'c20',     emoji:'🌊',name:'På vågen!',              desc:'20 rätt i rad',                                cat:'🔥 Combo', catEn:'🔥 Combo', nameEn:'On a Roll!', descEn:'20 correct in a row'},
+  {id:'c25',     emoji:'🎯',name:'Prickskytt',             desc:'25 rätt i rad',                                cat:'🔥 Combo', catEn:'🔥 Combo', nameEn:'Sharpshooter', descEn:'25 correct in a row'},
+  {id:'c30',     emoji:'🚀',name:'Raketstart',             desc:'30 rätt i rad',                                cat:'🔥 Combo', catEn:'🔥 Combo', nameEn:'Rocketstart', descEn:'30 correct in a row'},
+  {id:'c50',     emoji:'🦁',name:'Lejonhjärta',            desc:'50 rätt i rad',                                cat:'🔥 Combo', catEn:'🔥 Combo', nameEn:'Lionheart', descEn:'50 correct in a row'},
+  {id:'c75',     emoji:'🌟',name:'Stjärnstatus',           desc:'75 rätt i rad',                                cat:'🔥 Combo', catEn:'🔥 Combo', nameEn:'Star Status', descEn:'75 correct in a row'},
+  {id:'c100',    emoji:'💯',name:'HUNDRA I RAD!',          desc:'100 rätt i rad — legendariskt!',              cat:'🔥 Combo', catEn:'🔥 Combo', nameEn:'ONE HUNDRED!', descEn:'100 correct in a row — legendary!'},
+  {id:'len15',   emoji:'📏',name:'Stor orm',               desc:'Nå längd 15',                                  cat:'🐍 Orm', catEn:'🐍 Snake', nameEn:'Big Snake', descEn:'Reach length 15'},
+  {id:'len25',   emoji:'🐍',name:'Jätteorm!',              desc:'Nå längd 25',                                  cat:'🐍 Orm', catEn:'🐍 Snake', nameEn:'Giant Snake!',    descEn:'Reach length 25'},
+  {id:'len35',   emoji:'🦕',name:'Dinosarieorm!',          desc:'Nå längd 35',                                  cat:'🐍 Orm', catEn:'🐍 Snake', nameEn:'Dinosaur Snake!', descEn:'Reach length 35'},
+  {id:'len50',   emoji:'🌍',name:'Världsrekordsorm!',      desc:'Nå längd 50 — nästan omöjligt!',               cat:'🐍 Orm', catEn:'🐍 Snake', nameEn:'World Record Snake!', descEn:'Reach length 50 — nearly impossible!'},
+  {id:'osviklig',emoji:'❤️',name:'Felfri',                 desc:'10 rätt utan att tappa ett enda liv',          cat:'⭐ Special', catEn:'⭐ Special', nameEn:'Flawless', descEn:'10 correct without losing a single life'},
+  {id:'genius',  emoji:'🧠',name:'Mattegeni',              desc:'1 000p på Åk6 med alla 4 räknesätt',          cat:'⭐ Special', catEn:'⭐ Special', nameEn:'Math Genius', descEn:'1,000pts on grade 6 with all 4 operations'},
 ];
 
 /* ═══════════════════════════════════════
@@ -1319,7 +1339,7 @@ function renderMedalsPage(){
   const earned=loadMedals();
   document.getElementById('mpCount').textContent=`${earned.size} / ${MEDALS_DEF.length} upplåsta`;
   const cats={};
-  MEDALS_DEF.forEach(m=>{if(!cats[m.cat])cats[m.cat]=[];cats[m.cat].push(m);});
+  MEDALS_DEF.forEach(m=>{const c=getLang()==='en'&&m.catEn?m.catEn:m.cat;if(!cats[c])cats[c]=[];cats[c].push(m);});
   const el=document.getElementById('medalsPageContent');el.innerHTML='';
   Object.entries(cats).forEach(([cat,medals])=>{
     const sec=document.createElement('div');sec.className='medals-cat';
@@ -1433,7 +1453,9 @@ function updateMusicMode(){
   else if(!fast&&isFastMusic){fastMusic.pause();bgMusic.play().catch(()=>{});isFastMusic=false;}
 }
 function updateMenuMusicBtn(){
-  $('btnMenuMusic').textContent=musicOn?'🔊 Musik':'🔇 Musik';
+  const icon=musicOn?'🔊 ':'🔇 ';
+  const txt=getLang()==='en'?'Music':'Musik';
+  $('btnMenuMusic').innerHTML=icon+'<span id="musicBtnText">'+txt+'</span>';
 }
 function toggleMusic(){
   musicOn=!musicOn;
@@ -1953,7 +1975,7 @@ function triggerGameOver(){
   state='gameover';sfxDie();bgMusic.pause();fastMusic.pause();isFastMusic=false;
   stopTitelMusic(true); // börja om från början när spelaren går till menyn
   showTouchControls(false);
-  $('goScore').textContent=`Poäng: ${score}`;
+  $('goScore').textContent=`${t('goScoreLabel')} ${score}`;
   const opsStr=[...activeOps].map(o=>({'+':'+','-':'−','*':'×','/':'÷'})[o]).join(' ');
   const tStr=tables.size>0?` | tabellerna ${[...tables].sort((a,b)=>a-b).join(',')}`:'';
   $('goMeta').textContent=`${opsStr} · inom ${numRange}${tStr}`;
@@ -2198,6 +2220,9 @@ function goToSettings(){showScreen('settingsScreen');}
 function updateMenuSettingsSummary(){
   const el=$('menuSettingsSummary');if(!el)return;
   const om={'+':'➕','-':'➖','*':'✖️','/':'➗'};
+  const opsStr=[...activeOps].map(o=>om[o]||o).join(' ');
+  el.textContent=opsStr+' · '+t('rangeW'+numRange);
+};
   const opsStr=[...activeOps].map(o=>om[o]||o).join(' ');
   const rm={10:'Inom 10',20:'Upp till 20',100:'Upp till 100',1000:'Upp till 1000'};
   el.textContent=opsStr+' · '+(rm[numRange]||'');
