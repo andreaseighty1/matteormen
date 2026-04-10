@@ -451,7 +451,7 @@ canvas{border:1px solid var(--line);border-radius:12px;touch-action:none;
   <div class="menu-nav-grid">
     <button class="menu-nav-btn" id="btnGoSettings">⚙️<span id="settingsBtnLabel">Inställningar</span></button>
     <button class="menu-nav-btn" id="btnGoMedals"><div class="mn-emoji">🏅</div><div class="mn-label">MEDALJER</div><div class="mn-count" id="medalsBtnCount">0 / 0</div></button>
-    <button class="menu-nav-btn" id="btnGoSkins"><div class="mn-emoji">🎨</div><div id="skinsBtnLabel">ORMSKINN</div><div class="mn-count" id="skinsBtnCount">0 / 0</div></button>
+    <button class="menu-nav-btn" id="btnGoSkins"><div class="mn-emoji">🎨</div><div class="mn-label" id="skinsBtnLabel">ORMSKINN</div><div class="mn-count" id="skinsBtnCount">0 / 0</div></button>
     <button class="menu-nav-btn" id="btnGoHS"><div class="mn-emoji">🏆</div><span>Highscore</span></button>
   </div>
   <div id="menuHs" style="display:none"></div>
@@ -632,7 +632,7 @@ canvas{border:1px solid var(--line);border-radius:12px;touch-action:none;
 <div class="flash-good" id="flashGood"></div>
 <div class="flash-bad"  id="flashBad"></div>
 <div id="medalToast"></div>
-<div class="copyright" id="copyrightEl"></div>
+<div class="copyright" id="copyrightEl">© 2026 Andreas Jonsson – Skapad med Claude AI 🐍 &nbsp;·&nbsp; v3.0</div>
 
 <script>
 /* ═══════════════════════════════════════
@@ -1799,6 +1799,7 @@ function draw(t){
       ctx.strokeStyle=`rgba(255,215,0,${fade})`;ctx.lineWidth=2.5;rRect(3,3,CELL-6,CELL-6,12);ctx.stroke();
       ctx.shadowBlur=0;ctx.fillStyle=`rgba(255,229,102,${fade})`;
       ctx.font=`900 ${fs}px Nunito,'Exo 2',sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.imageSmoothingEnabled=false;
       ctx.fillText(val,CELL/2,CELL/2);
       ctx.restore();
     }
@@ -1826,24 +1827,32 @@ function draw(t){
   }
 }
 function drawTile(t){
-  const pad=Math.max(2,Math.floor(CELL*0.1));
-  const px=t.x*CELL+pad,py=t.y*CELL+pad,s=CELL-pad*2;
+  const r=Math.floor(CELL*0.18);
+  const px=t.x*CELL+2,py=t.y*CELL+2,s=CELL-4;
+  const cx=t.x*CELL+CELL/2,cy=t.y*CELL+CELL/2;
   const val=String(t.value);
-  const fs=val.length<=2?Math.min(18,Math.floor(CELL*0.52)):val.length===3?Math.min(14,Math.floor(CELL*0.4)):Math.min(11,Math.floor(CELL*0.32));
+  const fs=val.length<=2?Math.min(17,Math.floor(CELL*0.5)):val.length===3?Math.min(13,Math.floor(CELL*0.38)):Math.min(11,Math.floor(CELL*0.3));
+  ctx.save();
   if(t.isGold){
-    ctx.shadowColor='rgba(255,215,0,.9)';ctx.shadowBlur=22;
-    ctx.fillStyle='rgba(255,215,0,.35)';rRect(px,py,s,s,12);ctx.fill();
-    ctx.strokeStyle='#ffd700';ctx.lineWidth=2.5;rRect(px,py,s,s,12);ctx.stroke();
-    ctx.shadowBlur=0;ctx.fillStyle='#ffe566';
+    ctx.shadowColor='rgba(255,200,0,.9)';ctx.shadowBlur=16;
+    ctx.fillStyle='rgba(255,200,0,.3)';rRect(px,py,s,s,r);ctx.fill();
+    ctx.strokeStyle='#ffd700';ctx.lineWidth=2;rRect(px,py,s,s,r);ctx.stroke();
+    ctx.shadowBlur=0;
+    ctx.font=`900 ${fs}px Nunito,'Exo 2',sans-serif`;
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillStyle='#fff176';
+    ctx.shadowColor='rgba(255,220,0,.9)';ctx.shadowBlur=8;
+    ctx.fillText(val,cx,cy);
   }else{
-    ctx.shadowColor='rgba(140,190,255,.6)';ctx.shadowBlur=13;
-    ctx.fillStyle='rgba(80,140,255,.22)';rRect(px,py,s,s,Math.floor(CELL*0.35));ctx.fill();
-    ctx.strokeStyle='rgba(160,210,255,.75)';ctx.lineWidth=1.8;rRect(px,py,s,s,12);ctx.stroke();
-    ctx.shadowBlur=0;ctx.fillStyle='#eaf5ff';
+    ctx.fillStyle='rgba(15,30,80,.88)';rRect(px,py,s,s,r);ctx.fill();
+    ctx.strokeStyle='rgba(180,220,255,.95)';ctx.lineWidth=1.5;rRect(px,py,s,s,r);ctx.stroke();
+    ctx.font=`900 ${fs}px Nunito,'Exo 2',sans-serif`;
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillStyle='#ffffff';
+    ctx.shadowColor='rgba(150,210,255,.9)';ctx.shadowBlur=6;
+    ctx.fillText(val,cx,cy);
   }
-  ctx.font=`900 ${fs}px Nunito,'Exo 2',sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.shadowColor=t.isGold?'rgba(255,200,0,.85)':'rgba(160,220,255,.8)';ctx.shadowBlur=t.isGold?9:5;
-  ctx.fillText(val,t.x*CELL+CELL/2,t.y*CELL+CELL/2);ctx.shadowBlur=0;
+  ctx.restore();
 }
 function drawSeg(rx,ry,i,isHead){
   const skin=getActiveSkinDef();
