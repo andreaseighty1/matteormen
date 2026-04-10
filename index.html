@@ -857,7 +857,7 @@ function applyLang(){
   if(sbs[2])sbs[2].textContent=t('speedLength');
   updateRangeHint();
   // Toggle (wall) buttons
-  const tbs=document.querySelectorAll('.toggle-btn');
+  const tbs=document.querySelectorAll('.toggle-btn[data-ww]');
   if(tbs[0])tbs[0].textContent=t('wallDie');
   if(tbs[1])tbs[1].textContent=t('wallWrap');
   // Play/HS/Medals
@@ -894,43 +894,31 @@ function applyLang(){
   if(mnLabel)mnLabel.textContent=t('medalsLabel');
   // Medals/HS page titles
   if($('mpTitleEl'))$('mpTitleEl').textContent=t('mpTitle');
-  if($('copyrightEl'))$('copyrightEl').innerHTML=t('copyright');
-  if($('settingsTitleEl'))$('settingsTitleEl').textContent=t('settingsTitle');
-  if($('settingsBtnLabel'))$('settingsBtnLabel').textContent=getLang()==='en'?'Settings':'Inställningar';
-  if($('settingsBackText'))$('settingsBackText').textContent=t('settingsBack');
-  updateMenuMusicBtn();
-  document.querySelectorAll('.mode-btn').forEach(b=>{
-    if(b.dataset.mode==='standard')b.textContent=t('modeStandard');
-    if(b.dataset.mode==='practice')b.textContent=t('modePractice');
-  });
-  if($('modeDesc'))$('modeDesc').textContent=t(practiceMode?'modeDescPractice':'modeDescStandard');
-  document.querySelectorAll('.theme-btn').forEach(b=>{
-    const tmap={natt:t('themeNight'),skog:t('themeForest'),hav:t('themeOcean'),solnedgang:t('themeSunset')};
-    if(tmap[b.dataset.theme])b.textContent=tmap[b.dataset.theme];
-  });
-  const spts=document.querySelectorAll('#settingsScreen .panel-title');
-  const ptKeys=['panelOps','panelRange','panelTables','panelSpeed','panelWalls','panelMode','panelAppearance'];
-  spts.forEach((el,i)=>{if(ptKeys[i])el.textContent=t(ptKeys[i]);});
-  buildGradeRow();
-  updateMenuSettingsSummary();
-  if($('btnBackFromSettings'))$('btnBackFromSettings').textContent=t('settingsBack');
-  document.querySelectorAll('.mode-btn').forEach(b=>{
-    if(b.dataset.mode==='standard')b.textContent=t('modeStandard');
-    if(b.dataset.mode==='practice')b.textContent=t('modePractice');
-  });
-  if($('modeDesc'))$('modeDesc').textContent=t(practiceMode?'modeDescPractice':'modeDescStandard');
-  document.querySelectorAll('.theme-btn').forEach(b=>{
-    const tmap={natt:t('themeNight'),skog:t('themeForest'),hav:t('themeOcean'),solnedgang:t('themeSunset')};
-    if(tmap[b.dataset.theme])b.textContent=tmap[b.dataset.theme];
-  });
-  const spts=document.querySelectorAll('#settingsScreen .panel-title');
-  const ptKeys=['panelOps','panelRange','panelTables','panelSpeed','panelWalls','panelMode','panelAppearance'];
-  spts.forEach((el,i)=>{if(ptKeys[i])el.textContent=t(ptKeys[i]);});
-  buildGradeRow();
-  // Speed description (uppdatera med nuvarande speedMode)
+  // Speed description
   const _sdMap={none:t('speedDescNone'),score:t('speedDescScore'),length:t('speedDescLength')};
   if($('speedDesc'))$('speedDesc').textContent=_sdMap[speedMode]||'';
+  // Inställningssidan
+  if($('settingsTitleEl'))$('settingsTitleEl').textContent=t('settingsTitle');
+  if($('settingsBtnLabel'))$('settingsBtnLabel').textContent=l==='en'?'Settings':'Inställningar';
+  if($('settingsBackText'))$('settingsBackText').textContent=t('settingsBack');
+  // Spelläge-knappar
+  document.querySelectorAll('.mode-btn').forEach(b=>{
+    if(b.dataset.mode==='standard')b.textContent=t('modeStandard');
+    if(b.dataset.mode==='practice')b.textContent=t('modePractice');
+  });
+  if($('modeDesc'))$('modeDesc').textContent=t(practiceMode?'modeDescPractice':'modeDescStandard');
+  // Tema-knappar
+  document.querySelectorAll('.theme-btn').forEach(b=>{
+    const tmap={natt:t('themeNight'),skog:t('themeForest'),hav:t('themeOcean'),solnedgang:t('themeSunset')};
+    if(tmap[b.dataset.theme])b.textContent=tmap[b.dataset.theme];
+  });
+  // Inställningar panel-titlar
+  const spts=document.querySelectorAll('#settingsScreen .panel-title');
+  const ptKeys=['panelOps','panelRange','panelTables','panelSpeed','panelWalls','panelMode','panelAppearance'];
+  spts.forEach((el,i)=>{if(ptKeys[i])el.textContent=t(ptKeys[i]);});
   renderHS();updateMedalNavBtn();
+  buildGradeRow();
+  updateMenuSettingsSummary();
 }
 
 const GRADES={
@@ -2222,10 +2210,6 @@ function updateMenuSettingsSummary(){
   const om={'+':'➕','-':'➖','*':'✖️','/':'➗'};
   const opsStr=[...activeOps].map(o=>om[o]||o).join(' ');
   el.textContent=opsStr+' · '+t('rangeW'+numRange);
-};
-  const opsStr=[...activeOps].map(o=>om[o]||o).join(' ');
-  const rm={10:'Inom 10',20:'Upp till 20',100:'Upp till 100',1000:'Upp till 1000'};
-  el.textContent=opsStr+' · '+(rm[numRange]||'');
 }
 
 /* ═══════════════════════════════════════
