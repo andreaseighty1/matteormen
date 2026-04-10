@@ -34,7 +34,8 @@
   --ov-card-bg:rgba(18,8,4,.96);--toast-bg:rgba(25,10,5,.96);
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html{height:100%}body{height:100dvh;min-height:100%;background:var(--bg);color:var(--text);font-family:'Exo 2',sans-serif;overflow:hidden}
+html{height:100%}body{height:100dvh;min-height:100%;background:var(--bg);color:var(--text);font-family:'Exo 2',sans-serif;overflow:hidden;
+  padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);}
 body{display:flex;flex-direction:column;align-items:center;justify-content:center;
   background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(0,255,100,.06),transparent 60%),
              linear-gradient(180deg,#060c08,#03080a);}
@@ -437,7 +438,7 @@ canvas{border:1px solid var(--line);border-radius:12px;touch-action:none;
     <button id="btnChangeName">✏️ Byt namn</button>
     <button id="btnMenuMusic">🔊 Musik</button>
   </div>
-  <img src="matteormen_banner.png"
+  <img id="menuBanner" src="matteormen_banner.png"
        style="width:min(290px,76vw);margin-bottom:5px;filter:drop-shadow(0 0 22px rgba(0,200,80,.5))"
        alt="Matte-ormen">
   <div class="menu-sub" id="menuSub">Ät rätt svar — väx! Fel svar — krymper!</div>
@@ -784,7 +785,13 @@ const STRINGS={
     seasonalActive:'Seasonal mode active:',
   }
 };
-function getLang(){return localStorage.getItem(LANG_KEY)||'sv';}
+function getDefaultLang(){
+  const saved=localStorage.getItem(LANG_KEY);
+  if(saved)return saved;
+  const bl=navigator.language||navigator.userLanguage||'sv';
+  return bl.toLowerCase().startsWith('sv')?'sv':'en';
+}
+function getLang(){return getDefaultLang();}
 function t(key,vars={}){
   const s=STRINGS[getLang()]||STRINGS.sv;
   let str=s[key]||STRINGS.sv[key]||key;
@@ -799,6 +806,8 @@ function setLang(lang){
 }
 function applyLang(){
   const l=getLang();
+  const banner=$('menuBanner');
+  if(banner)banner.src=l==='en'?'matteormen_banner_en.png':'matteormen_banner.png';
   // Namnmodal
   $('nameModalTitle').textContent=t('nameModalTitle');
   $('nameModalSub').textContent=t('nameModalSub');
@@ -1053,7 +1062,9 @@ let speedMode='none',wallWrap=false;
    ═══════════════════════════════════════ */
 const canvas=document.getElementById('c'),ctx=canvas.getContext('2d');
 function initCanvas(){
-  const avH=Math.max(200,window.innerHeight-258);
+  const safeTop=parseInt(getComputedStyle(document.documentElement).getPropertyValue('padding-top')||'0');
+  const safeBot=parseInt(getComputedStyle(document.documentElement).getPropertyValue('padding-bottom')||'0');
+  const avH=Math.max(200,window.innerHeight-270-safeTop-safeBot);
   const avW=window.innerWidth-4;
   CELL=Math.max(18,Math.min(Math.floor(avH/ROWS),Math.floor(avW/COLS),28));
   canvas.width=COLS*CELL;canvas.height=ROWS*CELL;
@@ -2207,7 +2218,7 @@ document.addEventListener('keydown',e=>{
    INIT
    ═══════════════════════════════════════ */
 // Init lang-knappar
-const _il=getLang();$('btnLangSv').classList.toggle('sel',_il==='sv');$('btnLangEn').classList.toggle('sel',_il==='en');
+const _il=getLang();if($('btnLangSv'))$('btnLangSv').classList.toggle('sel',_il==='sv');if($('btnLangEn'))$('btnLangEn').classList.toggle('sel',_il==='en');
 buildGradeRow();buildTableGrid();updateRangeHint();updateTablePanelVisibility();
 const sdMap2={none:t('speedDescNone'),score:t('speedDescScore'),length:t('speedDescLength')};
 $('speedDesc').textContent=sdMap2[speedMode]||'';
@@ -2221,6 +2232,11 @@ syncSkinsFromMedals();
 renderHS();updateMedalNavBtn();updateSkinNavBtn();updatePlayerBar();setupDpad();
 applyUITheme(loadUITheme());
 applyMode(localStorage.getItem('mattormen_mode')||'standard');
+// Sätt språk automatiskt vid första besök
+if(!localStorage.getItem(LANG_KEY)){
+  const bl=navigator.language||'sv';
+  localStorage.setItem(LANG_KEY,bl.toLowerCase().startsWith('sv')?'sv':'en');
+}
 applyLang();
 if(!loadPlayer())showNameModal();
 </script>
