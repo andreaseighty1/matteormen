@@ -2271,18 +2271,18 @@ $('hsNameInp').addEventListener('keydown',e=>{if(e.key==='Enter')$('btnSaveScore
 function unlockAudio(){
   if(audioUnlocked)return;
   audioUnlocked=true;
+  // Bara låsa upp AudioContext — musik hanteras av goToMenu/startGame/tryTitelMusic
   if(typeof getAC==='function'){
     try{
       const ac=getAC();
-      if(ac.state==='suspended'){
-        ac.resume().then(()=>{if(musicOn)tryTitelMusic();});
-      }else{if(musicOn)tryTitelMusic();}
-    }catch(e){if(musicOn)tryTitelMusic();}
-  }else{if(musicOn)tryTitelMusic();}
+      if(ac.state==='suspended')ac.resume().catch(()=>{});
+    }catch(e){}
+  }
+  // Nu när audio är upplåst, starta titelmusik OM vi är i menyn
+  if(state==='menu'&&musicOn)tryTitelMusic();
 }
-['pointerdown','touchstart','click'].forEach(ev=>
-  document.addEventListener(ev,unlockAudio,{once:true,passive:true})
-);
+// Använd bara ett event för unlock, inte alla tre (undviker dubbeltriggning)
+document.addEventListener('pointerdown',unlockAudio,{once:true,passive:true});
 
 /* ═══════════════════════════════════════
    TANGENTBORDSINPUT
