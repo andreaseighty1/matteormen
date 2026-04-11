@@ -186,7 +186,8 @@ canvas{border:1px solid var(--line);border-radius:12px;touch-action:none;
 .skins-grid{display:flex;flex-wrap:wrap;gap:10px;width:100%;max-width:640px;padding-bottom:24px;}
 .skin-card{display:flex;align-items:center;gap:10px;padding:10px 12px;
   border:2px solid var(--line);border-radius:12px;background:var(--panel);
-  cursor:pointer;transition:.15s;flex:1;min-width:195px;max-width:310px;position:relative;}
+  cursor:pointer;transition:.15s;flex:1;min-width:195px;max-width:310px;position:relative;
+  user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;}
 .skin-card:hover:not(.locked){border-color:var(--accent);}
 .skin-card.active{border-color:var(--accent);background:rgba(0,255,136,.1);box-shadow:0 0 12px rgba(0,255,136,.2);}
 .skin-card.locked{opacity:.45;cursor:default;}
@@ -640,7 +641,8 @@ const HS_KEY='mattormen_v3_hs', PLAYER_KEY='mattormen_player',
       MEDALS_KEY='mattormen_medals_v1', OP_SCORES_KEY='mattormen_op_scores',
       STATS_KEY='mattormen_stats', LANG_KEY='mattormen_lang',
       SKINS_KEY='mattormen_skins_v1', ACTIVE_SKIN_KEY='mattormen_active_skin',
-      ACTIVE_HEAD_KEY='mattormen_head_acc';
+      ACTIVE_HEAD_KEY='mattormen_head_acc',
+      SETTINGS_KEY='mattormen_settings';
 
 // RANGE_HINTS är nu i STRINGS — se t('rangeHint10') etc.
 // SPEED_DESCS är nu i STRINGS — se t('speedDescNone') etc.
@@ -953,6 +955,7 @@ const MEDALS_DEF=[
   {id:'len25',   emoji:'🐍',name:'Jätteorm!',              desc:'Nå längd 25',                                  cat:'🐍 Orm', catEn:'🐍 Snake', nameEn:'Giant Snake!',    descEn:'Reach length 25'},
   {id:'len35',   emoji:'🦕',name:'Dinosarieorm!',          desc:'Nå längd 35',                                  cat:'🐍 Orm', catEn:'🐍 Snake', nameEn:'Dinosaur Snake!', descEn:'Reach length 35'},
   {id:'len50',   emoji:'🌍',name:'Världsrekordsorm!',      desc:'Nå längd 50 — nästan omöjligt!',               cat:'🐍 Orm', catEn:'🐍 Snake', nameEn:'World Record Snake!', descEn:'Reach length 50 — nearly impossible!'},
+  {id:'len75',   emoji:'🐲',name:'Legendarisk orm!',        desc:'Nå längd 75 — är du människa?!',               cat:'🐍 Orm', catEn:'🐍 Snake', nameEn:'Legendary Snake!',    descEn:'Reach length 75 — are you even human?!'},
   {id:'osviklig',emoji:'❤️',name:'Felfri',                 desc:'10 rätt utan att tappa ett enda liv',          cat:'⭐ Special', catEn:'⭐ Special', nameEn:'Flawless', descEn:'10 correct without losing a single life'},
   {id:'genius',  emoji:'🧠',name:'Mattegeni',              desc:'1 000p på Åk6 med alla 4 räknesätt',          cat:'⭐ Special', catEn:'⭐ Special', nameEn:'Math Genius', descEn:'1,000pts on grade 6 with all 4 operations'},
 ];
@@ -1090,6 +1093,22 @@ function toggleHeadAccessory(){
 /* ═══════════════════════════════════════
    INSTÄLLNINGAR
    ═══════════════════════════════════════ */
+function saveSettings(){
+  localStorage.setItem(SETTINGS_KEY,JSON.stringify({
+    ops:[...activeOps],numRange,tables:[...tables],speedMode,wallWrap
+  }));
+}
+function loadSettings(){
+  try{
+    const s=JSON.parse(localStorage.getItem(SETTINGS_KEY));
+    if(!s)return;
+    if(s.ops&&s.ops.length)activeOps=new Set(s.ops);
+    if(s.numRange)numRange=s.numRange;
+    if(s.tables&&s.tables.length)tables=new Set(s.tables);
+    if(s.speedMode)speedMode=s.speedMode;
+    if(typeof s.wallWrap==='boolean')wallWrap=s.wallWrap;
+  }catch(e){}
+}
 let activeOps=new Set(['+','-']),numRange=20,tables=new Set([2,5,10]);
 let speedMode='none',wallWrap=false;
 
@@ -1286,6 +1305,7 @@ function checkMedals(){
   if(snake.length>=25) unlockMedal('len25');
   if(snake.length>=35) unlockMedal('len35');
   if(snake.length>=50) unlockMedal('len50');
+  if(snake.length>=75) unlockMedal('len75');
   if(score>=1000&&activeOps.size===4&&numRange===1000) unlockMedal('genius');
 }
 function checkOpMedals(){
@@ -1314,7 +1334,7 @@ function getMedalProgress(id){
     c25:{cur:stats.bestCombo,max:25},c30:{cur:stats.bestCombo,max:30},
     c50:{cur:stats.bestCombo,max:50},c75:{cur:stats.bestCombo,max:75},
     c100:{cur:stats.bestCombo,max:100},
-    len15:{cur:stats.bestLength,max:15},len25:{cur:stats.bestLength,max:25},len35:{cur:stats.bestLength,max:35},len50:{cur:stats.bestLength,max:50},
+    len15:{cur:stats.bestLength,max:15},len25:{cur:stats.bestLength,max:25},len35:{cur:stats.bestLength,max:35},len50:{cur:stats.bestLength,max:50},len75:{cur:stats.bestLength,max:75},
     osviklig:{cur:stats.bestStreak,max:10},
     genius:null,
   };
@@ -2054,7 +2074,7 @@ function updateRangeHint(){const map={10:t('rangeHint10'),20:t('rangeHint20'),10
 document.querySelectorAll('.range-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{numRange=parseInt(btn.dataset.r);
     document.querySelectorAll('.range-btn').forEach(b=>b.classList.remove('sel'));
-    btn.classList.add('sel');updateRangeHint();deselectPreset();});
+    btn.classList.add('sel');updateRangeHint();deselectPreset();saveSettings();});
 });
 function buildTableGrid(){
   const grid=$('tableGrid');grid.innerHTML='';
@@ -2063,7 +2083,7 @@ function buildTableGrid(){
     btn.textContent=`×${n}`;btn.dataset.n=n;
     btn.addEventListener('click',()=>{
       if(tables.has(n)){tables.delete(n);btn.classList.remove('sel');}else{tables.add(n);btn.classList.add('sel');}
-      updateTableQuickSel();deselectPreset();});
+      updateTableQuickSel();deselectPreset();saveSettings();});
     grid.appendChild(btn);
   }
 }
@@ -2085,12 +2105,12 @@ document.querySelectorAll('.op-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{const op=btn.dataset.op;
     if(activeOps.has(op)){if(activeOps.size===1)return;activeOps.delete(op);btn.classList.remove('sel');}
     else{activeOps.add(op);btn.classList.add('sel');}
-    updateTablePanelVisibility();deselectPreset();});
+    updateTablePanelVisibility();deselectPreset();saveSettings();});
 });
 document.querySelectorAll('.speed-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{speedMode=btn.dataset.sm;
     document.querySelectorAll('.speed-btn').forEach(b=>b.classList.remove('sel'));
-    btn.classList.add('sel');const sdMap={none:t('speedDescNone'),score:t('speedDescScore'),length:t('speedDescLength')};$('speedDesc').textContent=sdMap[speedMode]||'';});
+    btn.classList.add('sel');const sdMap={none:t('speedDescNone'),score:t('speedDescScore'),length:t('speedDescLength')};$('speedDesc').textContent=sdMap[speedMode]||'';saveSettings();});
 });
 // Väggar-toggle
 document.querySelectorAll('.toggle-btn[data-ww]').forEach(btn=>{
@@ -2098,6 +2118,7 @@ document.querySelectorAll('.toggle-btn[data-ww]').forEach(btn=>{
     wallWrap=btn.dataset.ww==='true';
     btn.closest('.toggle-row').querySelectorAll('.toggle-btn').forEach(b=>b.classList.remove('sel'));
     btn.classList.add('sel');
+    saveSettings();
   });
 });
 function buildGradeRow(){
@@ -2109,7 +2130,7 @@ function buildGradeRow(){
       document.querySelectorAll('.op-btn').forEach(ob=>ob.classList.toggle('sel',activeOps.has(ob.dataset.op)));
       document.querySelectorAll('.range-btn').forEach(rb=>rb.classList.toggle('sel',parseInt(rb.dataset.r)===numRange));
       updateRangeHint();updateTablePanelVisibility();
-      document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');});
+      document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');saveSettings();});
     row.appendChild(btn);
   });
 }
@@ -2249,14 +2270,19 @@ $('hsNameInp').addEventListener('keydown',e=>{if(e.key==='Enter')$('btnSaveScore
 // Export/import borttaget i mobilversion — localStorage hanterar allt automatiskt
 function unlockAudio(){
   if(audioUnlocked)return;
-  // Starta AudioContext (krävs på Android)
-  if(typeof getAC==='function'){try{const ac=getAC();if(ac.state==='suspended')ac.resume();}catch(e){}}
-  if(musicOn)tryTitelMusic();
   audioUnlocked=true;
+  if(typeof getAC==='function'){
+    try{
+      const ac=getAC();
+      if(ac.state==='suspended'){
+        ac.resume().then(()=>{if(musicOn)tryTitelMusic();});
+      }else{if(musicOn)tryTitelMusic();}
+    }catch(e){if(musicOn)tryTitelMusic();}
+  }else{if(musicOn)tryTitelMusic();}
 }
-document.addEventListener('pointerdown', unlockAudio, {once:true});
-document.addEventListener('touchstart', unlockAudio, {once:true, passive:true});
-document.addEventListener('click', unlockAudio, {once:true});
+['pointerdown','touchstart','click'].forEach(ev=>
+  document.addEventListener(ev,unlockAudio,{once:true,passive:true})
+);
 
 /* ═══════════════════════════════════════
    TANGENTBORDSINPUT
@@ -2294,6 +2320,13 @@ syncSkinsFromMedals();
 renderHS();updateMedalNavBtn();updateSkinNavBtn();updatePlayerBar();setupDpad();
 applyUITheme(loadUITheme());
 applyMode(localStorage.getItem('mattormen_mode')||'standard');
+loadSettings();
+// Synka UI med laddade inställningar
+document.querySelectorAll('.op-btn').forEach(ob=>ob.classList.toggle('sel',activeOps.has(ob.dataset.op)));
+document.querySelectorAll('.range-btn').forEach(rb=>rb.classList.toggle('sel',parseInt(rb.dataset.r)===numRange));
+document.querySelectorAll('.speed-btn').forEach(sb=>sb.classList.toggle('sel',sb.dataset.sm===speedMode));
+document.querySelectorAll('.toggle-btn[data-ww]').forEach(tb=>tb.classList.toggle('sel',tb.dataset.ww===(wallWrap?'true':'false')));
+updateTablePanelVisibility();updateRangeHint();
 // Sätt språk automatiskt vid första besök
 if(!localStorage.getItem(LANG_KEY)){
   const bl=navigator.language||'sv';
